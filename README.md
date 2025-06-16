@@ -1,0 +1,2 @@
+SET UP THE REPO
+SVCVcz6A# smartVote
