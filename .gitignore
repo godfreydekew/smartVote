@@ -12,7 +12,7 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
-
+.hg
 # Node.js artifacts
 node_modules/
 dist/
