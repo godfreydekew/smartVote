@@ -1,0 +1,17 @@
+{
+  "name": "thirdweb-contracts-dekew",
+  "version": "1.0.7",
+  "main": "index.js",
+  "repository": "https://github.com/thirdweb-example/forge-starter.git",
+  "author": "thirdweb <eng@thirdweb.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@thirdweb-dev/contracts": "^3"
+  },
+  "scripts": {
+    "build": "npx thirdweb@latest detect",
+    "deploy": "npx thirdweb@latest deploy",
+    "publish": "npx thirdweb@latest publish",
+    "release": "npx thirdweb@latest release"
+  }
+}

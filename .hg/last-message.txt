@@ -1,0 +1,7 @@
+refactor: clean up core files and improve formatting
+
+- Remove unnecessary spaces
+- Apply consistent indentation
+- Remove redundant error checks
+- Improve code readability and structure
+- Limit line length to a maximum of 100 characters
