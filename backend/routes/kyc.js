@@ -4,14 +4,6 @@ const axios = require('axios');
 const crypto = require('crypto');
 const { updateUserKYCSession } = require('../database/queries/users/kycQueries.js');
 
-/**
- * @route POST /kyc/start
- * @description Initiates a new KYC verification session for a user
- * @param {Object} req.body.userId - User's unique identifier
- * @param {Object} req.body.email - User's email address
- * @param {Object} req.body.phone - User's phone number
- * @returns {Object} Session ID and verification URL
- */
 router.post('/start', async (req, res) => {
   const { userId, email, phone } = req.body;
 
@@ -47,12 +39,7 @@ router.post('/start', async (req, res) => {
   }
 });
 
-/**
- * @route GET /kyc/result/:sessionId
- * @description Retrieves the verification result for a specific session
- * @param {string} req.params.sessionId - KYC session identifier
- * @returns {Object} Verification result data if approved
- */
+
 router.get('/result/:sessionId', async (req, res) => {
   const { sessionId } = req.params;
 
@@ -82,12 +69,6 @@ router.get('/result/:sessionId', async (req, res) => {
   }
 });
 
-/**
- * @route DELETE /kyc/deletesession/:sessionId
- * @description Deletes a KYC verification session
- * @param {string} req.params.sessionId - KYC session identifier to delete
- * @returns {Object} Success status and response data
- */
 router.delete('/deletesession/:sessionId', async (req, res) => {
   const { sessionId } = req.params;
 
@@ -114,13 +95,6 @@ router.delete('/deletesession/:sessionId', async (req, res) => {
 });
 
 
-/**
- * @route POST /kyc/webhook
- * @description Handles webhook notifications from Didit API
- * @param {Object} req.body - Webhook payload containing verification results
- * @param {string} req.headers.x-signature - HMAC signature for webhook verification
- * @returns {number} HTTP status code
- */
 router.post('/webhook', async (req, res) => {
   // Verify webhook signature
   const signature = req.headers['x-signature'];
@@ -149,12 +123,6 @@ router.post('/webhook', async (req, res) => {
 });
 
 
-/**
- * @route POST /kyc/callback
- * @description Handles callback notifications from Didit API
- * @param {Object} req.body - Callback payload
- * @returns {number} HTTP status code
- */
 router.post('/callback', async (req, res) => {
   console.log('KYC callback received:', req.body);
   res.sendStatus(200);

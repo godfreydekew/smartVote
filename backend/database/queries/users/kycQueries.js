@@ -3,7 +3,6 @@ const { DatabaseError } = require('../../utils/errors');
 
 async function updateUserKYCSession(userId, sessionId) {
   try {
-
     console.log('Updating KYC session for user:', userId, 'with session ID:', sessionId);
     const query = `
       UPDATE users 
@@ -43,5 +42,5 @@ async function getUserWithKYCSession(userId) {
 
 module.exports = {
   updateUserKYCSession,
-  getUserWithKYCSession
+  getUserWithKYCSession,
 };

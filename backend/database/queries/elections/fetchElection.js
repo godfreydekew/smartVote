@@ -1,4 +1,3 @@
-// database/queries/electionQueries.js
 const { pool } = require('../../db');
 const { DatabaseError } = require('../../utils/errors');
 

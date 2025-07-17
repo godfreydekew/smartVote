@@ -65,16 +65,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const response = await apiClient.post(`user/login`, { email, password });
       // cnsole.log('Login response:', response.data.user);
-
-      if (response.data.kycUrl && !response.data.user.kyc_session_id) {
-        // Redirect to KYC flow
-        window.location.href = response.data.kycUrl;
-        // setIsAuthenticated(true);
-      } else {
-        setUser(response.data.user);
-        setIsAuthenticated(true);
-        navigate('/dashboard');
-      }
+      setUser(response.data.user);
+      setIsAuthenticated(true);
+      navigate('/dashboard');
+      // if (response.data.kycUrl && !response.data.user.kyc_session_id) {
+      //   // Redirect to KYC flow
+      //   window.location.href = response.data.kycUrl;
+      //   // setIsAuthenticated(true);
+      // } else {
+      //   setUser(response.data.user);
+      //   setIsAuthenticated(true);
+      //   navigate('/dashboard');
+      // }
     } catch (error) {
       setIsAuthenticated(false);
       throw error;

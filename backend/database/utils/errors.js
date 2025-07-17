@@ -1,4 +1,3 @@
-// utils/errors.js
 class DatabaseError extends Error {
   constructor(message, code = 'DATABASE_ERROR') {
     super(message);

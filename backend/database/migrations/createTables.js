@@ -125,7 +125,7 @@ async function createTables() {
   }
 }
 
-createTables()
+// createTables()
 
 module.exports = {
   createTables

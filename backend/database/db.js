@@ -1,21 +1,13 @@
-//db.js
 require('dotenv').config();
 const { Pool } = require("pg");
 
-const password = process.env.DB_PASSWORD;
-const user = process.env.DB_USER;
-const host = process.env.DB_HOST;
-const database = process.env.DB_DATABASE;
-
-
 const pool = new Pool({
-  user: user,
-  host: host,
-  database: "newdb",
-  password: password,
-  port: 5432,
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_DATABASE,
+  password: process.env.DB_PASSWORD,
+  port: process.env.DB_PORT,
 });
-
 
 async function checkDatabaseConnection() {
   try {
@@ -27,5 +19,6 @@ async function checkDatabaseConnection() {
     throw error;
   }
 }
+
 checkDatabaseConnection();
 module.exports = { pool, checkDatabaseConnection };

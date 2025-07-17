@@ -16,7 +16,7 @@ async function createCandidate(electionId, name, ipfsDetailsHash, manifestHash, 
     
     return result.rows[0];
   } catch (error) {
-    if (error.code === '23505') { // Unique violation
+    if (error.code === '23505') { 
       throw new DatabaseError('Ballot position already taken');
     }
     throw new DatabaseError('Error creating candidate: ' + error.message);

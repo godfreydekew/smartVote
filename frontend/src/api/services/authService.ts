@@ -1,7 +1,6 @@
 
 import apiClient from '../config';
 
-// Types for auth requests and responses
 export interface LoginRequest {
   email: string;
   password: string;

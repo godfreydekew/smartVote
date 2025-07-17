@@ -1,5 +1,4 @@
 const { pool } = require('../db');
-//Fix the candidate Duplicate Issue
 async function createTables() {
   const client = await pool.connect();
 

@@ -1,55 +1,6 @@
 const { pool } = require('../db');
 const { DatabaseError } = require('../utils/errors');
 
-async function createElection(
-  orgId,
-  title,
-  ipfsDetailsHash,
-  smartContractAddress,
-  startTime,
-  endTime,
-  parameters
-) {
-  try {
-    const result = await pool.query(
-      `INSERT INTO election (
-        organization_id, title, ipfs_details_hash, smart_contract_address,
-        start_time, end_time, status, parameters
-      )
-       VALUES ($1, $2, $3, $4, $5, $6, 'draft', $7) RETURNING *`,
-      [
-        orgId,
-        title,
-        ipfsDetailsHash,
-        smartContractAddress,
-        startTime,
-        endTime,
-        parameters
-      ]
-    );
-
-    if (!result.rows[0]) {
-      throw new DatabaseError('Failed to create election');
-    }
-
-    return result.rows[0];
-  } catch (error) {
-    if (error.code === '23503') {
-      // Foreign key violation
-      throw new DatabaseError(
-        'Organization not found',
-        'ORGANIZATION_NOT_FOUND'
-      );
-    }
-    if (error.code === '23505') {
-      throw new DatabaseError(
-        'Election already exists for this organization',
-        'DUPLICATE_ELECTION_TITLE'
-      );
-    }
-    throw new DatabaseError('Error creating election: ' + error.message);
-  }
-}
 
 async function getElectionById(electionId) {
   try {
@@ -71,19 +22,7 @@ async function getElectionById(electionId) {
   }
 }
 
-async function getOrganizationElections(orgId) {
-  try {
-    const result = await pool.query(
-      'SELECT * FROM election WHERE organization_id = $1 ORDER BY created_at DESC',
-      [orgId]
-    );
-    return result.rows;
-  } catch (error) {
-    throw new DatabaseError(
-      'Error fetching organization elections: ' + error.message
-    );
-  }
-}
+
 
 async function updateElectionStatus(electionId, status) {
   try {
@@ -225,9 +164,7 @@ const addEligibleVoter = async (electionId, name, email) => {
 };
 
 module.exports = {
-  createElection,
   getElectionById,
-  getOrganizationElections,
   updateElectionStatus,
   addElectionRule,
   getElectionRules,

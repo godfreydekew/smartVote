@@ -20,9 +20,9 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  if (!isAuthenticated || !user.kyc_session_id) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
+  // if (!isAuthenticated || !user.kyc_session_id) {
+  //   return <Navigate to="/login" state={{ from: location }} replace />;
+  // }
 
   return children;
 };
