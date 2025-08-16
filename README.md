@@ -29,19 +29,21 @@ This project requires environment variable files for both the frontend and backe
 git clone https://github.com/godfreydekew/smartVote.git
 cd smartVote
 ```
+### 2. Install dependencies && configure .env
+```sh
+chmod +x build.sh
+./build.sh
+```
 
 ### 2. Setup the Backend
+### ! Create Postgres db and update credentials in .env file
 ```sh
 cd backend
-npm install
-# Configure environment variables in a .env file
 nodemon
 ```
 
 ### 3. Setup the Frontend
 ```sh
 cd frontend
-npm install
-# Configure environment variables in a .env file
-npm run dev
+yarn dev
 ```

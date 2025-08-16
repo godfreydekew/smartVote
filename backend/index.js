@@ -10,10 +10,13 @@ let { RedisStore } = require('connect-redis');
 const userRoutes = require('./routes/userRoutes.js');
 const electionRoutes = require('./routes/electionRoutes.js');
 const kycRoutes = require('./routes/kyc.js');
+const { createTables } = require('./database/migrations/createTables.js');
 
 const app = express();
 const server = createServer(app);
 const port = 3001;
+
+createTables()
 
 app.use(express.json());
 
