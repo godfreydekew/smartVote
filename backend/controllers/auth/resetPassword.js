@@ -4,6 +4,8 @@ const bcrypt = require('bcrypt');
 const resetPassword = async (req, res) => {
   const { token, newPassword } = req.body;
 
+  console.log("Resetting password for token:", token);
+
   if (!token || !newPassword) {
     return res.status(400).json({
       status: 'error',

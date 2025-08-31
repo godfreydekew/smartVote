@@ -5,6 +5,8 @@ const crypto = require('crypto');
 const requestPasswordReset = async (req, res) => {
   const { email } = req.body;
 
+  console.log('Password reset request for email:', email);
+
   if (!email) {
     return res.status(400).json({
       status: 'error',

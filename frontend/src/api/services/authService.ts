@@ -12,6 +12,10 @@ export interface SignupRequest {
   name: string;
 }
 
+export interface passwordResetRequest {
+  email: string;
+}
+
 export interface UserResponse {
   id: string;
   email: string;
@@ -42,7 +46,7 @@ const authService = {
    * Endpoint: POST /login
    */
   login: async (credentials: LoginRequest) => {
-    const response = await apiClient.post('/login', credentials);
+    const response = await apiClient.post('user/login', credentials);
     return response.data;
   },
 
@@ -51,7 +55,7 @@ const authService = {
    * Endpoint: POST /logout
    */
   logout: async () => {
-    const response = await apiClient.post('/logout');
+    const response = await apiClient.post('user/logout');
     return response.data;
   },
 
@@ -60,7 +64,18 @@ const authService = {
    * Endpoint: GET /check-session
    */
   checkSession: async () => {
-    const response = await apiClient.get('/check-session');
+    const response = await apiClient.get('user/check-session');
+    return response.data;
+  },
+
+  /**
+   * Send password reset request
+   * Endpoint: POST /request-password-reset
+   *
+   * @param email - The email address of the user requesting a password reset
+   */
+  requestPasswordReset: async (email: string) => {
+    const response = await apiClient.post('user/request-password-reset', { email });
     return response.data;
   },
 
@@ -70,7 +85,19 @@ const authService = {
    * Requires authentication
    */
   postApplyAdmin: async () => {
-    const response = await apiClient.post('/apply-admin');
+    const response = await apiClient.post('user/apply-admin');
+    return response.data;
+  },
+
+  /**
+   * Reset password
+   * Endpoint: POST /reset-password
+   *
+   * @param token - The password reset token
+   * @param password - The new password
+   */
+  resetPassword: async (token: string, password: string) => {
+    const response = await apiClient.post('user/reset-password', { token, newPassword: password });
     return response.data;
   },
 };
