@@ -4,7 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { TooltipContent, TooltipProvider, TooltipTrigger, Tooltip } from '@/components/ui/tooltip';
+import { TooltipContent, TooltipTrigger, Tooltip } from '@/components/ui/tooltip';
 import { useAuth } from '@/auth/AuthProvider';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -87,7 +87,7 @@ const Login = () => {
   const onSubmit = async (data: FormData) => {
     try {
       toast({
-        title: `${data?.email} and ${data?.password}`,
+        title: `${data?.email}`,
         description: 'Please wait while we log you in.',
         variant: 'default',
       });
@@ -185,7 +185,6 @@ const Login = () => {
           <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
             <div className="space-y-4">
               {!account?.address ? (
-                <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div>
@@ -217,7 +216,6 @@ const Login = () => {
                       <p>Please connect your account first</p>
                     </TooltipContent>
                   </Tooltip>
-                </TooltipProvider>
               ) : (
                 <div>
                   <Label htmlFor="email" className="text-gray-900 font-semibold text-base">
@@ -236,7 +234,6 @@ const Login = () => {
                 </div>
               )}
               {!account?.address ? (
-                <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div>
@@ -275,7 +272,6 @@ const Login = () => {
                       <p>Please connect your account first</p>
                     </TooltipContent>
                   </Tooltip>
-                </TooltipProvider>
               ) : (
                 <div>
                   <Label htmlFor="password" className="text-gray-900 font-semibold text-base">
