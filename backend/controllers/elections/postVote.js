@@ -3,10 +3,15 @@ const { DatabaseError, handlePostgresError } = require('../../database/utils/err
 
 const postVote = async (req, res) => {
   const { electionId } = req.params;
+  const { candidateId } = req.body;
   const userId = req.session.user.id;
 
+  if (!candidateId) {
+    return res.status(400).json({ message: 'Candidate ID is required' });
+  }
+
   try {
-    const updatedElection = await recordVote(electionId, userId);
+    const updatedElection = await recordVote(electionId, userId, candidateId);
 
     if (!updatedElection) {
       return res.status(404).json({ message: 'Election not found' });

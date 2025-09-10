@@ -10,6 +10,7 @@ let { RedisStore } = require('connect-redis');
 const userRoutes = require('./routes/userRoutes.js');
 const electionRoutes = require('./routes/electionRoutes.js');
 const kycRoutes = require('./routes/kyc.js');
+const analyticsRoutes = require('./routes/analyticsRoutes');
 const { createTables } = require('./database/migrations/createTables.js');
 
 const app = express();
@@ -75,6 +76,7 @@ app.use((req, res, next) => {
 app.use('/api/user', userRoutes);
 app.use('/api/admin', electionRoutes);
 app.use('/api/kyc', kycRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 app.get('/', (req, res) => {
   res.status(200).json({ message: 'Welcome to the voting system' });

@@ -2,14 +2,22 @@ const { pool } = require('../../db');
 const { DatabaseError } = require('../../utils/errors');
 const { handlePostgresError } = require('../../utils/errors');
 
-async function recordVote(electionId, userId) {
+async function recordVote(electionId, userId, candidateId) {
   //Increae the vote count for the election
   try {
+    await client.query('BEGIN');
+
     const userElectionResult = await pool.query(
       `INSERT into  user_participated_elections
              (user_id, election_id, has_voted, vote_time)
              VALUES ($1, $2, true, NOW())`,
       [userId, electionId]
+    );
+
+    await client.query(
+      `INSERT INTO vote_log (time, election_id, user_id, candidate_id)
+       VALUES (NOW(), $1, $2, $3)`,
+      [electionId, userId, candidateId]
     );
 
     const result = await pool.query(
@@ -19,8 +27,10 @@ async function recordVote(electionId, userId) {
       [electionId]
     );
 
+    await client.query('COMMIT');
     return result.rows[0];
   } catch (error) {
+    await client.query('ROLLBACK');
     if (error.code === '23505') {
       throw new DatabaseError('User has already voted in this election', 'USER_ALREADY_VOTED');
     }
