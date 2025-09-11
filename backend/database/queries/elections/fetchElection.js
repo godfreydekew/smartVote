@@ -12,7 +12,13 @@ async function fetchAllElections() {
 
 async function fetchElectionById(electionId) {
   try {
-    const result = await pool.query(`SELECT * FROM elections WHERE id = $1`, [electionId]);
+    const result = await pool.query(`
+      SELECT e.*, json_agg(ev.public_key) as voters
+      FROM elections e
+      LEFT JOIN election_voters ev ON e.id = ev.election_id
+      WHERE e.id = $1
+      GROUP BY e.id
+    `, [electionId]);
     return result.rows[0];
   } catch (error) {
     throw new DatabaseError('Error fetching election: ' + error.message);

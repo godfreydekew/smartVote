@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-import {AutoElection} from './Voting.sol';
+import {Voting} from './Voting.sol';
 
 contract ElectionFactory {
     struct Election {
@@ -11,38 +11,29 @@ contract ElectionFactory {
         uint256 endTime;
         bool isPublic;
         address owner;
+        bytes32 merkleRoot;
     }
 
     Election[] public deployedElections;
     mapping(uint256 => address) public electionIdToAddress;
     mapping(address => Election[]) public electionsByOwner;
 
-    event ElectionDeployed(uint256 id, address electionAddress, uint256 candidatesLength);
+    event ElectionDeployed(uint256 id, address electionAddress, bytes32 merkleRoot);
 
-    struct CandidateInput {
-        uint256 id;
-        string name;
-    }
-
-    function createElectionWithCandidates(
+    function createElection(
         uint256 _id,
         string memory _title,
         uint256 _startTime,
         uint256 _endTime,
         bool _isPublic,
-        CandidateInput[] calldata _candidates
+        bytes32 _merkleRoot
     ) public {
         require(electionIdToAddress[_id] == address(0), 'Election ID exists');
-        require(_candidates.length > 0, 'At least 1 candidate required');
         require(_startTime > block.timestamp, 'Start time must be in future');
 
-        AutoElection newElection = new AutoElection(_id, _title, _startTime, _endTime, _isPublic);
+        Voting newElection = new Voting(_merkleRoot);
 
         address electionAddress = address(newElection);
-
-        for (uint i = 0; i < _candidates.length; i++) {
-            newElection.addCandidate(_candidates[i].id, _candidates[i].name);
-        }
 
         Election memory newElectionData = Election({
             electionAddress: electionAddress,
@@ -51,7 +42,8 @@ contract ElectionFactory {
             startTime: _startTime,
             endTime: _endTime,
             isPublic: _isPublic,
-            owner: msg.sender
+            owner: msg.sender,
+            merkleRoot: _merkleRoot
         });
 
         // Store reference
@@ -59,27 +51,7 @@ contract ElectionFactory {
         electionIdToAddress[_id] = electionAddress;
         electionsByOwner[msg.sender].push(newElectionData);
 
-        emit ElectionDeployed(_id, electionAddress, _candidates.length);
-    }
-
-    function getElectionsByState(AutoElection.ElectionState _state) public view returns (Election[] memory) {
-        Election[] memory tempResults = new Election[](deployedElections.length);
-        uint256 counter = 0;
-
-        for (uint256 i = 0; i < deployedElections.length; i++) {
-            AutoElection electionContract = AutoElection(deployedElections[i].electionAddress);
-            if (electionContract.getElectionState() == _state) {
-                tempResults[counter] = deployedElections[i];
-                counter++;
-            }
-        }
-
-        Election[] memory filteredResults = new Election[](counter);
-        for (uint256 i = 0; i < counter; i++) {
-            filteredResults[i] = tempResults[i];
-        }
-
-        return filteredResults;
+        emit ElectionDeployed(_id, electionAddress, _merkleRoot);
     }
 
     function getElectionsByOwner(address owner) public view returns (Election[] memory) {

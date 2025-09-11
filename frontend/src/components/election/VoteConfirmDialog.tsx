@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,21 +16,52 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { SHA256 } from 'crypto-js';
 
 interface VoteConfirmDialogProps {
   candidate: any | null;
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: (proof: any, leaf: any, index: any, nullifier: any) => void;
+  publicKey: string;
+  secretKey: string;
+  electionId: string;
 }
 
 const VoteConfirmDialog: React.FC<VoteConfirmDialogProps> = ({
   candidate,
   isOpen,
   onClose,
-  onConfirm
+  onConfirm,
+  publicKey,
+  secretKey,
+  electionId,
 }) => {
   if (!candidate) return null;
+
+  const [proof, setProof] = useState<any>(null);
+  const [leaf, setLeaf] = useState<any>(null);
+  const [index, setIndex] = useState<any>(null);
+  const [nullifier, setNullifier] = useState<any>(null);
+
+  const handleConfirm = async () => {
+    const leaf = SHA256(publicKey).toString();
+    const proof = await getMerkleProof(publicKey);
+    const nullifier = SHA256(secretKey + electionId).toString();
+
+    setLeaf(leaf);
+    setProof(proof.proof);
+    setIndex(proof.index);
+    setNullifier(nullifier);
+
+    onConfirm(proof.proof, leaf, proof.index, nullifier);
+  };
+
+  const getMerkleProof = async (publicKey: string) => {
+    const response = await fetch(`/api/election/merkle-proof/${electionId}/${publicKey}`);
+    const data = await response.json();
+    return data;
+  };
 
   console.log(candidate);
   return (
@@ -120,7 +151,7 @@ const VoteConfirmDialog: React.FC<VoteConfirmDialogProps> = ({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm}>
+          <AlertDialogAction onClick={handleConfirm}>
             Confirm Vote
           </AlertDialogAction>
         </AlertDialogFooter>
