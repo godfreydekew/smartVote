@@ -1,4 +1,4 @@
-const { getElection } = require('../../database/queries/elections/getElection.js');
+const { getElection } = require('./getElection.js');
 const { MerkleTree } = require('merkletreejs');
 const SHA256 = require('crypto-js/sha256');
 
