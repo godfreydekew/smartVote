@@ -11,27 +11,23 @@ contract ElectionFactory {
         uint256 endTime;
         bool isPublic;
         address owner;
-        bytes32 merkleRoot;
     }
 
     Election[] public deployedElections;
     mapping(uint256 => address) public electionIdToAddress;
     mapping(address => Election[]) public electionsByOwner;
 
-    event ElectionDeployed(uint256 id, address electionAddress, bytes32 merkleRoot);
+    event ElectionDeployed(uint256 id, address electionAddress, address owner);
 
     function createElection(
         uint256 _id,
         string memory _title,
-        uint256 _startTime,
-        uint256 _endTime,
-        bool _isPublic,
-        bytes32 _merkleRoot
+        bool _isPublic
+        // Timestamps are removed, as they will be set during finalization
     ) public {
         require(electionIdToAddress[_id] == address(0), 'Election ID exists');
-        require(_startTime > block.timestamp, 'Start time must be in future');
 
-        Voting newElection = new Voting(_merkleRoot);
+        Voting newElection = new Voting();
 
         address electionAddress = address(newElection);
 
@@ -39,11 +35,10 @@ contract ElectionFactory {
             electionAddress: electionAddress,
             id: _id,
             title: _title,
-            startTime: _startTime,
-            endTime: _endTime,
+            startTime: 0, // Will be set later
+            endTime: 0,   // Will be set later
             isPublic: _isPublic,
-            owner: msg.sender,
-            merkleRoot: _merkleRoot
+            owner: msg.sender
         });
 
         // Store reference
@@ -51,7 +46,7 @@ contract ElectionFactory {
         electionIdToAddress[_id] = electionAddress;
         electionsByOwner[msg.sender].push(newElectionData);
 
-        emit ElectionDeployed(_id, electionAddress, _merkleRoot);
+        emit ElectionDeployed(_id, electionAddress, msg.sender);
     }
 
     function getElectionsByOwner(address owner) public view returns (Election[] memory) {

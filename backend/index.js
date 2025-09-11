@@ -11,12 +11,16 @@ const userRoutes = require('./routes/userRoutes.js');
 const electionRoutes = require('./routes/electionRoutes.js');
 const kycRoutes = require('./routes/kyc.js');
 const { createTables } = require('./database/migrations/createTables.js');
+const { electionScheduler } = require('./services/electionScheduler.js');
 
 const app = express();
 const server = createServer(app);
 const port = 3001;
 
 createTables()
+
+// Initialize the election finalization scheduler
+electionScheduler();
 
 app.use(express.json());
 
