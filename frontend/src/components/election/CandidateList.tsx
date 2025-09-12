@@ -10,6 +10,7 @@ interface CandidateListProps {
   onVote: (candidate: any) => void;
   address: any;
   isEligible: boolean;
+  hasUserVoted: boolean;
 }
 
 const CandidateList: React.FC<CandidateListProps> = ({
@@ -21,6 +22,7 @@ const CandidateList: React.FC<CandidateListProps> = ({
   onVote,
   address,
   isEligible,
+  hasUserVoted,
 }) => {
   return (
     <div className="mb-16">
@@ -41,6 +43,7 @@ const CandidateList: React.FC<CandidateListProps> = ({
             onVote={onVote}
             address={address}
             isEligible={isEligible}
+            hasUserVoted={hasUserVoted}
           />
         ))}
       </div>

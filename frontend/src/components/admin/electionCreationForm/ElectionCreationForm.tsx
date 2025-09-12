@@ -40,6 +40,7 @@ export const ElectionCreationForm = ({ onChange, initialData }: ElectionCreation
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [csvPreview, setCsvPreview] = useState<string[]>([]);
   const [csvErrors, setCsvErrors] = useState<string[]>([]);
+  const [csvInvitedEmails, setCsvInvitedEmails] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { mutate: sendTransaction, isPending: isTransactionPending } = useSendTransaction();
   const { user } = useAuth();
@@ -115,7 +116,7 @@ export const ElectionCreationForm = ({ onChange, initialData }: ElectionCreation
       organization: initialData?.organization || '',
       description: initialData?.description || '',
       rules: initialData?.rules || [''],
-      startDate: initialData?.startDate || new Date(),
+      startDate: initialData?.startDate || new Date(Date.now() + 5 * 60), // 5 minutes from now
       endDate: initialData?.endDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week from now
       type: initialData?.type || 'public',
       kycRequired: initialData?.kycRequired ?? false,
@@ -163,11 +164,11 @@ export const ElectionCreationForm = ({ onChange, initialData }: ElectionCreation
       const reader = new FileReader();
       reader.onload = (event) => {
         const text = event.target?.result as string;
-        const emails = text.split(/\r?\n/).map(email => email.trim()).filter(email => email !== '');
+        const emails = text.split(/,|\r?\n/).map(email => email.replace("'", "").trim()).filter(email => email !== '');
         
         const validEmails: string[] = [];
         const invalidEmails: string[] = [];
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emailRegex = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i;
 
         emails.forEach(email => {
           if (emailRegex.test(email)) {
@@ -177,7 +178,7 @@ export const ElectionCreationForm = ({ onChange, initialData }: ElectionCreation
           }
         });
 
-        form.setValue('invitedEmails', validEmails);
+        setCsvInvitedEmails(validEmails);
         setCsvPreview(emails);
         setCsvErrors(invalidEmails);
 
@@ -204,7 +205,23 @@ export const ElectionCreationForm = ({ onChange, initialData }: ElectionCreation
 
     let electionId;
     try {
-      console.log(data.description);
+      console.log(data);
+      const allInvitedEmails = Array.from(new Set([...(data.invitedEmails || []), ...csvInvitedEmails]));
+
+      console.log('All Invited Emails:', allInvitedEmails);
+      console.log('CSV Invited Emails:', csvInvitedEmails);
+      console.log('Form Invited Emails:', data.invitedEmails);
+
+      if (data.type === 'invite-only' && allInvitedEmails.length === 0) {
+        toast({
+          title: 'Validation Error',
+          description: 'At least one invited email is required for invite-only elections.',
+          variant: 'destructive',
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       const electionRequest: ElectionRequest = {
         title: data.title,
         description: data.description,
@@ -218,7 +235,7 @@ export const ElectionCreationForm = ({ onChange, initialData }: ElectionCreation
         kyc_required: data.kycRequired,
         age_restriction: data.ageRestriction,
         regions: data.regions,
-        invitedEmails: data.invitedEmails,
+        invitedEmails: allInvitedEmails,
         accessControl: data.accessControl,
         ownerAddress: 'ASDASDASDAS',
         ownerUserId: user.id,

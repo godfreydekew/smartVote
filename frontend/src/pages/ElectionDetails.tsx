@@ -409,6 +409,7 @@ const ElectionDetailsPage = () => {
             onVote={initiateVote}
             address={address}
             isEligible={isEligible}
+            hasUserVoted={hasUserVoted}
           />
         </div>
 
@@ -438,6 +439,7 @@ const ElectionDetailsPage = () => {
         isCompleted={isCompleted}
         totalVotes={election.totalVotes}
         isEligible={isEligible}
+        hasUserVoted={hasUserVoted}
       />
 
       {/* Vote Confirmation Dialog */}

@@ -32,6 +32,7 @@ interface CandidateCardProps {
   isActive: boolean;
   address: any;
   isEligible: boolean;
+  hasUserVoted: boolean;
 }
 
 const CandidateCard: React.FC<CandidateCardProps> = ({
@@ -43,6 +44,7 @@ const CandidateCard: React.FC<CandidateCardProps> = ({
   isActive,
   address,
   isEligible,
+  hasUserVoted,
 }) => {
   const singleElection = singleElectionContract(address);
 
@@ -145,13 +147,21 @@ const CandidateCard: React.FC<CandidateCardProps> = ({
             View profile
           </Button>
           
-          {isActive && isEligible && (
+          {isActive && isEligible && !hasUserVoted && (
             <Button 
               className="w-full"
               onClick={() => onVote(candidate)}
-              disabled={!isEligible}
+              disabled={!isEligible || hasUserVoted}
             >
               Vote
+            </Button>
+          )}
+          {isActive && hasUserVoted && (
+            <Button 
+              className="w-full"
+              disabled
+            >
+              Voted
             </Button>
           )}
         </div>
