@@ -70,7 +70,7 @@ const Login = () => {
     if (isAuthenticated) {
       navigate(from);
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, from]);
 
   // Auto-fill email if verified through Connect component
   useEffect(() => {

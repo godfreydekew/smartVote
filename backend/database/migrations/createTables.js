@@ -15,6 +15,7 @@ async function createTables() {
             country_of_residence TEXT,
             email TEXT UNIQUE NOT NULL,
             password TEXT,
+            identitycommitment TEXT,
             user_role TEXT DEFAULT 'basic', -- 'admin', 'basic'
             kyc_verified BOOLEAN DEFAULT FALSE,
             kyc_session_id VARCHAR(255) DEFAULT NULL, -- For storing KYC session ID
