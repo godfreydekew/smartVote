@@ -24,8 +24,7 @@ const formatDateTime = (date: string | Date) => {
   return {
     date: format(d, 'MMM dd, yyyy'),
     time: format(d, 'h:mm a'),
-    fullDateTime: format(d, 'MMM dd, yyyy h:mm a'),
-    relative: formatDistance(d, new Date(), { addSuffix: true })
+    fullDateTime: format(d, 'MMM dd, yyyy h:mm a')
   };
 };
 
@@ -54,14 +53,14 @@ const ElectionDetails = ({
             <Calendar className="h-5 w-5 text-muted-foreground" />
             <div>
               <p className="text-sm text-muted-foreground">Start Date</p>
-              <p className="font-medium">{formattedStartDate}</p>
+              <p className="font-medium">{formattedStartDate.fullDateTime}</p>
             </div>
           </div>
           <div className="flex items-center space-x-3">
             <Calendar className="h-5 w-5 text-muted-foreground" />
             <div>
               <p className="text-sm text-muted-foreground">End Date</p>
-              <p className="font-medium">{formattedEndDate}</p>
+              <p className="font-medium">{formattedEndDate.fullDateTime}</p>
             </div>
           </div>
         </div>

@@ -9,6 +9,7 @@ interface CandidateListProps {
   onViewProfile: (candidate: any) => void;
   onVote: (candidate: any) => void;
   address: any;
+  isEligible: boolean;
 }
 
 const CandidateList: React.FC<CandidateListProps> = ({
@@ -19,6 +20,7 @@ const CandidateList: React.FC<CandidateListProps> = ({
   onViewProfile,
   onVote,
   address,
+  isEligible,
 }) => {
   return (
     <div className="mb-16">
@@ -38,6 +40,7 @@ const CandidateList: React.FC<CandidateListProps> = ({
             onViewProfile={onViewProfile}
             onVote={onVote}
             address={address}
+            isEligible={isEligible}
           />
         ))}
       </div>

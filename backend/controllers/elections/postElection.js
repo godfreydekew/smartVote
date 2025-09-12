@@ -1,5 +1,6 @@
 const { createElection } = require('../../database/queries/elections/createElection.js');
-const { addInvitedEmailsToEligibleVoters } = require('../../database/queries/elections/addInvitedEmailsToEligibleVoters.js');
+const { addEligibleUsersToElection } = require('../../database/queries/elections/addEligibleUsersToElection.js');
+const { processInvitations } = require('../../database/queries/elections/processInvitations.js');
 const yup = require('yup');
 
 const createElectionSchema = yup.object().shape({
@@ -35,13 +36,19 @@ const postElection = async (req, res) => {
 
     const newElection = await createElection(electionData);
 
-    if (electionData.type === 'invite-only' && electionData.invitedEmails && newElection && newElection.id) {
-      await addInvitedEmailsToEligibleVoters(newElection.id, electionData.invitedEmails);
+    let invitationResult = {};
+    if (newElection && newElection.id) {
+        if (electionData.type === 'invite-only' && electionData.invitedEmails) {
+            invitationResult = await processInvitations(newElection, electionData.invitedEmails);
+        } else if (electionData.type === 'public' || electionData.type === 'private') {
+            await addEligibleUsersToElection(newElection);
+        }
     }
 
     res.status(201).json({
       message: 'Election created successfully',
       election: newElection,
+      invitationResult,
     });
   } catch (error) {
     if (error instanceof yup.ValidationError) {

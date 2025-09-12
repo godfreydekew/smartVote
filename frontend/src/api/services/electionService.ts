@@ -87,7 +87,12 @@ const electionService = {
   vote: async (electionId: number) => {
     const response = await apiClient.put(`/admin/election/vote/${electionId}`);
     return response.data;
-  }
+  },
+
+  isEligible: async (electionId: number): Promise<{ isEligible: boolean }> => {
+    const response = await apiClient.get(`/admin/election/is-eligible/${electionId}`);
+    return response.data;
+  },
 
   // updateElection: async (id: number, updates: Partial<ElectionRequest>) => {
   //   const response = await apiClient.patch<ElectionResponse>(`/admin/election/${id}`, updates);

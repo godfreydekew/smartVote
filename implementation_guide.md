@@ -4,11 +4,11 @@ This document provides a step-by-step guide to implementing the new private elec
 
 ## 1. Database Migration
 
-### 1.1. Create a New Migration File
+### 1.1. Create a New Migration File (`add_election_type.js`)
 
 Create a new file `backend/database/migrations/add_election_type.js`.
 
-### 1.2. Update `elections` Table
+### 1.2. Update `elections` Table (`add_election_type.js`)
 
 Alter the `elections` table to add the `type` and `kyc_required` columns and drop the now redundant `is_public` column.
 
@@ -46,7 +46,7 @@ module.exports = {
 };
 ```
 
-### 1.3. Update `eligible_voters` Table
+### 1.3. Update `eligible_voters` Table (`add_election_type.js`)
 
 Modify the `eligible_voters` table to use `email` and a nullable `user_id` for identifying voters, removing the generic `user_identifier` column.
 
@@ -98,24 +98,67 @@ module.exports = {
 };
 ```
 
-### 1.4. Run the Migration
+### 1.4. Create a New Migration File (`update_candidates_table.js`)
 
-Create a script to run the migrations or manually apply them. For this project, we'll update `backend/index.js` to run the new migration functions.
+Create a new file `backend/database/migrations/update_candidates_table.js` to update the `candidates` table.
+
+```javascript
+// backend/database/migrations/update_candidates_table.js
+const { pool } = require('../db');
+
+async function updateCandidatesTable() {
+    const client = await pool.connect();
+
+    try {
+        await client.query('BEGIN');
+
+        // Remove the UNIQUE constraint on 'name'
+        await client.query(`
+            ALTER TABLE candidates
+            DROP CONSTRAINT IF EXISTS candidates_name_key;
+        `);
+
+        // Add the composite UNIQUE constraint on 'election_id' and 'name'
+        await client.query(`
+            ALTER TABLE candidates
+            ADD CONSTRAINT unique_election_candidate UNIQUE (election_id, name);
+        `);
+
+        await client.query('COMMIT');
+        console.log('candidates table updated successfully.');
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Error updating candidates table:', error);
+        throw error;
+    } finally {
+        client.release();
+    }
+}
+
+module.exports = {
+    updateCandidatesTable
+};
+```
+
+### 1.5. Run the Migrations
+
+Update `backend/index.js` to run all migration functions.
 
 ```javascript
 // backend/index.js
 
 // ... (previous code)
 
+const { createTables } = require('./database/migrations/createTables.js');
 const { updateElectionsTable, updateEligibleVotersTable } = require('./database/migrations/add_election_type.js');
-
-// ... (previous code)
+const { updateCandidatesTable } = require('./database/migrations/update_candidates_table.js');
 
 (async () => {
-    await updateElectionsTable();
-    await updateEligibleVotersTable();
+  await createTables();
+  await updateElectionsTable();
+  await updateEligibleVotersTable();
+  await updateCandidatesTable();
 })();
-
 
 // ... (rest of the server startup code)
 ```
@@ -125,29 +168,37 @@ const { updateElectionsTable, updateEligibleVotersTable } = require('./database/
 
 ### 2.1. Update `postElection` Controller
 
-Modify `backend/controllers/elections/postElection.js` to handle the new `type`, `kyc_required`, `age_restriction`, `regions`, and `invitedEmails` fields. The validation schema will also need to be updated.
+Modify `backend/controllers/elections/postElection.js` to handle the new `type`, `kyc_required`, `age_restriction`, `regions`, and `invitedEmails` fields. The validation schema will also need to be updated. For `invite-only` elections, use `processInvitations` to check eligibility for existing users and send invitation emails.
 
-### 2.2. Create `checkEligibility` Service
+### 2.2. Refactor `checkEligibility` Logic
 
-Create a new file `backend/services/checkEligibility.js`. This service will contain a function that checks if a newly registered user is eligible for any upcoming or active elections based on `kyc_required`, `age_restriction`, and `regions` and adds them to the `eligible_voters` table.
+The `checkEligibility` logic, previously intended as a service, has been refactored into a shared utility function `checkCriteria` located at `backend/database/utils/criteria.js`. This function is used by `addUserToEligibleElections` and `processInvitations`.
 
 ### 2.3. Update `register` Controller
 
 Modify `backend/controllers/auth/register.js` to:
-1.  After creating a new user, call the `checkEligibility` service.
-2.  Check if the user's email exists in the `eligible_voters` table for any `invite-only` elections and update the `user_id` from `NULL` to the new user's ID.
+1.  After creating a new user, call `addUserToEligibleElections` to check if they match criteria for any upcoming elections.
+2.  Call `linkInvitedUser` to check for pending invitations and link them to the new user's account.
 
-### 2.4. Create Cron Job for Election Status
+### 2.4. Email Sending Utility
+
+Create a new utility file `backend/database/utils/email.js` to centralize email sending functionality. This utility will contain functions like `sendInvitationEmail` and `sendPasswordResetEmail`.
+
+### 2.5. Election Filtering Logic
+
+Modify the `getElections` controller in `backend/controllers/elections/getElection.js` to filter the list of elections sent to the frontend. Admins will receive all elections, while normal users will receive public elections and those they are eligible for (using `fetchPublicAndEligibleElections`).
+
+### 2.6. Create Cron Job for Election Status
 
 Create a new file `backend/jobs/updateElectionStatus.js`. This will be a simple script that runs periodically (e.g., using `node-cron`) to find elections where `start_date` has passed and the `status` is still `upcoming`, and update their status to `active`.
 
-### 2.5. Create `startElection` Controller
+### 2.7. Create `startElection` Controller
 
 Create a new file `backend/controllers/elections/startElection.js` with a function that allows an admin to manually change an election's status from `upcoming` to `active`.
 
-### 2.6. Update `electionRoutes.js`
+### 2.8. Update `electionRoutes.js`
 
-Add a new `PUT` or `POST` route to `backend/routes/electionRoutes.js` for the `startElection` controller.
+Add a new `PUT` or `POST` route to `backend/routes/electionRoutes.js` for the `startElection` controller, and a new GET route for `isEligible`.
 
 ## 3. Frontend
 
@@ -156,13 +207,22 @@ Add a new `PUT` or `POST` route to `backend/routes/electionRoutes.js` for the `s
 Modify `frontend/src/components/admin/electionCreationForm/ElectionCreationForm.tsx` to:
 -   Remove the `isPublic` switch.
 -   Add a dropdown or radio button group to select the election `type` (`public`, `private`, `invite-only`).
--   show UI elements to define `kyc_required`, `age_restriction`, and `regions`.
--   show a text area or file upload for a list of emails.
+-   Show UI elements to define `kyc_required`, `age_restriction`, and `regions`.
+-   Show a text area or file upload for a list of emails.
+-   Provide feedback on failed invitations for `invite-only` elections.
 
 ### 3.2. Update `ElectionDetails` Page
 
-Modify `frontend/src/pages/ElectionDetails.tsx` to display the election's type (`Public`, `Private`, `Invite-Only`) and its associated eligibility criteria.
+Modify `frontend/src/pages/ElectionDetails.tsx` to:
+-   Display the election's type (`Public`, `Private`, `Invite-Only`) and its associated eligibility criteria.
+-   Disable the vote button for ineligible users by passing an `isEligible` prop to `CandidateList` and `CandidateDetailDialog`.
 
 ### 3.3. Update `AdminDashboard` Component
 
 In `frontend/src/pages/AdminDashboard.tsx`, for elections with an `upcoming` status, add a "Start Now" button that calls the new `startElection` endpoint.
+
+### 3.4. Election Listing Visuals
+
+Update the election listing components (`frontend/src/components/dashboard/ElectionTabs.tsx`, `frontend/src/components/dashboard/ElectionsGrid.tsx`, `frontend/src/components/dashboard/ElectionCard.tsx`) to:
+-   Filter blockchain data based on the backend's filtered list of eligible/public elections.
+-   Visually distinguish between public, private, and invite-only elections using badges or icons on the `ElectionCard`.

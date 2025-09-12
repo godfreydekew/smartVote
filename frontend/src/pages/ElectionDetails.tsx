@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -16,7 +16,6 @@ import { BlockchainLogs } from '@/components/election/BlockchainLogs';
 import { ElectionStats } from '@/components/election/ElectionStats';
 
 import { electionService } from '@/api';
-import { useEffect } from 'react';
 import { userService } from '@/api';
 import { singleElectionContract } from '@/utils/thirdweb-client';
 import { useAuth } from '@/auth/AuthProvider';
@@ -50,6 +49,7 @@ const ElectionDetailsPage = () => {
   const status = searchParams.get('status');
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [isEligible, setIsEligible] = useState(false);
   
   const [election, setElectionData] = useState<{
     title: string;
@@ -165,6 +165,11 @@ const ElectionDetailsPage = () => {
 
           setElectionData(electionData);
           setCandidateData(candresponse.candidates);
+
+          if (user) {
+            const eligibilityResponse = await electionService.isEligible(Number(id));
+            setIsEligible(eligibilityResponse.isEligible);
+          }
         } else {
           console.error('Election not found');
         }
@@ -174,7 +179,7 @@ const ElectionDetailsPage = () => {
     };
 
     fetchElectionData();
-  }, [electionDetails, id, status]); // Added electionDetails as a dependency
+  }, [electionDetails, id, status, user]); // Added electionDetails as a dependency
 
   useEffect(() => {
     if (user?.address && election && candidates) {
@@ -394,15 +399,18 @@ const ElectionDetailsPage = () => {
         </div>
 
         {/* Candidates Section */}
-        <CandidateList
-          candidates={candidates}
-          totalVotes={election.totalVotes}
-          isActive={isActive}
-          isCompleted={isCompleted}
-          onViewProfile={openCandidateDetail}
-          onVote={initiateVote}
-          address={address}
-        />
+        <div id='candidates'>
+          <CandidateList
+            candidates={candidates}
+            totalVotes={election.totalVotes}
+            isActive={isActive}
+            isCompleted={isCompleted}
+            onViewProfile={openCandidateDetail}
+            onVote={initiateVote}
+            address={address}
+            isEligible={isEligible}
+          />
+        </div>
 
         {/* Election Stats Section - Only visible to admin users */}
         {election.status === 'completed' && (
@@ -412,7 +420,7 @@ const ElectionDetailsPage = () => {
         )}
 
         {/* Blockchain Logs Section - Only visible to admin users */}
-        {user?.role === 'admin' && (
+        {user?.user_role === 'admin' && (
           <BlockchainLogs 
             contractAddress={address} 
             network="sepolia"
@@ -429,6 +437,7 @@ const ElectionDetailsPage = () => {
         isActive={isActive}
         isCompleted={isCompleted}
         totalVotes={election.totalVotes}
+        isEligible={isEligible}
       />
 
       {/* Vote Confirmation Dialog */}
@@ -442,8 +451,8 @@ const ElectionDetailsPage = () => {
       {/* Sticky Mobile Action Button */}
       {isActive && (
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 md:hidden">
-          <Button className="w-full" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            View candidates and vote
+          <Button className="w-full" onClick={() => document.getElementById("candidates").scrollIntoView({ behavior: "smooth" })}>
+            View candidates {isEligible ? 'and vote' : ''}
           </Button>
         </div>
       )}

@@ -36,6 +36,21 @@ A new migration will be created to modify the `elections` table and the `eligibl
 | `age_restriction` | `INTEGER[]` | Array containing [minimum age, maximum age] for voters. Null if no age restriction. |
 | `regions` | `TEXT[]` | Array of country names (strings) from which voters are eligible. Null if no region restriction. |
 
+**`candidates` table:**
+
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `id` | `SERIAL PRIMARY KEY` | Unique identifier for the candidate. |
+| `name` | `TEXT NOT NULL` | Name of the candidate. |
+| `party` | `TEXT` | Political party or affiliation of the candidate. |
+| `position` | `TEXT NOT NULL` | Position the candidate is running for. |
+| `bio` | `TEXT` | Biography of the candidate. |
+| `photo` | `TEXT` | URL to the candidate's photo. |
+| `twitter` | `TEXT` | Candidate's Twitter handle. |
+| `website` | `TEXT` | Candidate's personal or campaign website. |
+| `election_id` | `INTEGER REFERENCES elections(id) ON DELETE CASCADE` | Foreign key to the `elections` table. |
+| `UNIQUE (election_id, name)` | | Ensures a candidate's name is unique within a specific election. |
+
 **`eligible_voters` table:**
 
 | Column | Type | Description |
@@ -44,15 +59,19 @@ A new migration will be created to modify the `elections` table and the `eligibl
 | `election_id` | `INTEGER REFERENCES elections(id)` | Foreign key to the `elections` table. |
 | `user_id` | `INTEGER REFERENCES users(id)` | Foreign key to the `users` table. Can be `NULL` if the user is not yet registered. |
 | `email` | `VARCHAR(255) NOT NULL` | The email of the eligible voter. |
+| `UNIQUE (election_id, user_id)` | | Ensures a registered user is unique per election. |
+| `UNIQUE (election_id, email)` | | Ensures an email is unique per election (for unregistered users). |
 
 ### 3.2. Backend
 
 The backend will be updated to handle the new election logic.
 
-*   **Election Creation**: The `postElection` controller will be updated to handle the creation of private elections and the new `type` and eligibility criteria fields.
-*   **Voter Eligibility**:
+*   **Election Creation**: The `postElection` controller will be updated to handle the creation of private elections and the new `type` and eligibility criteria fields. For `invite-only` elections, invited users will be checked against criteria, and emails will be sent.
+*   **Voter Eligibility**: 
     *   A new service will be created to check if a user is eligible for any upcoming or active elections upon registration.
     *   The `eligible_voters` table will be populated with the `user_id` when a user registers or an election is created.
+    *   Eligibility is also checked in real-time when a user attempts to vote.
+*   **Election Listing**: The backend will filter the list of elections sent to the frontend based on the user's role and eligibility. Admins see all elections, while normal users see public elections and elections they are eligible for.
 *   **Election Status**: the smart contract will automatically update the status of elections from `upcoming` to `active` when the `start_date` is reached.
 *   **Manual Start**: A new endpoint will be created to allow admins to manually start an election before the scheduled `start_date`.
 
@@ -60,32 +79,37 @@ The backend will be updated to handle the new election logic.
 
 The frontend will be updated to support the new election features.
 
-*   **Election Creation Form**: The election creation form will be updated to include options for creating private elections, specifying the election type, and defining eligibility criteria.
-*   **Election Details Page**: The election details page will be updated to display the election status and type.
+*   **Election Creation Form**: The election creation form will be updated to include options for creating private elections, specifying the election type, and defining eligibility criteria. It will also provide feedback on failed invitations for `invite-only` elections.
+*   **Election Details Page**: The election details page will be updated to display the election status and type, and to disable the vote button for ineligible users.
 *   **Admin Dashboard**: The admin dashboard will be updated to include a button to manually start an election.
+*   **Election Listing**: The election listing will visually distinguish between public, private, and invite-only elections using badges or icons.
 
 ## 4. Implementation Details
 
 ### 4.1. Database Migration
 
-A new migration file will be created to alter the `elections` and `eligible_voters` tables.
+New migration files will be created to alter the `elections` and `eligible_voters` tables, and to update the `candidates` table.
 
 ### 4.2. Backend
 
-*   The `postElection` controller will be updated to handle the new fields.
+*   The `postElection` controller will be updated to handle the new fields and process invitations.
 *   A new `checkEligibility` service will be created to check if a user is eligible for any elections.
 *   A new `startElection` controller will be created to manually start an election.
+*   Email sending logic will be refactored into a shared utility.
+*   Eligibility criteria checking logic will be refactored into a shared utility.
 
 ### 4.3. Frontend
 
-*   The `ElectionCreationForm` component will be updated to include the new fields.
-*   The `ElectionDetails` component will be updated to display the new information.
+*   The `ElectionCreationForm` component will be updated to include the new fields and display invitation results.
+*   The `ElectionDetails` component will be updated to display the new information and disable voting for ineligible users.
 *   A new button will be added to the `AdminDashboard` to manually start an election.
+*   The election listing components (`ElectionTabs`, `ElectionsGrid`, `ElectionCard`) will be updated to display election types visually.
 
 ## 5. Security Considerations
 
 *   The `checkEligibility` service will be designed to be efficient and scalable.
 *   All new endpoints will be protected by authentication and authorization middleware.
+*   Eligibility checks are performed on both frontend (for UX) and backend (for security).
 
 ## 6. Election Types Definition
 
@@ -105,6 +129,6 @@ This section defines the behavior of each election type based on the `type` colu
 
 ### 6.3. `invite-only` Election
 *   **Visibility**: The election is *not* publicly discoverable. Only users explicitly on an "invite list" can see it.
-*   **Voting Access**: Only users explicitly on an "invite list" (e.g., via email, or a pre-registered list) can vote.
+*   **Voting Access**: Only users explicitly on an "invite list" (e.g., via email, or a pre-registered list) can vote. Eligibility criteria are checked for existing users upon invitation.
 *   **Eligibility Criteria (`kyc_required`, `age_restriction`, `regions`)**: These are *optional* filters that can be applied *in addition to* being on the invite list. Only invited users who *also* meet these criteria can vote.
 *   **Invitation Links**: The primary access mechanism. Links are tied to the pre-approved invite list.

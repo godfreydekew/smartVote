@@ -227,6 +227,14 @@ export const ElectionCreationForm = ({ onChange, initialData }: ElectionCreation
       const electionResponse = await electionService.createElection(electionRequest);
       electionId = electionResponse?.election?.id;
 
+      if (electionResponse?.invitationResult?.failedInvitations?.length > 0) {
+        toast({
+          title: 'Some invitations failed',
+          description: `The following emails were not invited because they did not meet the eligibility criteria: ${electionResponse.invitationResult.failedInvitations.map(f => f.email).join(', ')}`,
+          variant: 'destructive',
+        });
+      }
+
       if (typeof electionId !== 'number' || isNaN(electionId)) {
         throw new Error('Invalid election ID received. Expected a number.');
       }

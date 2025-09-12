@@ -12,7 +12,7 @@ interface User {
   id: string;
   email: string;
   name: string;
-  role: string;
+  user_role: string;
   address?: string;
   identitycommitment?: string;
   kyc_session_id?: string;
