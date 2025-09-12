@@ -62,6 +62,10 @@ const ElectionDetailsPage = () => {
     participants: number;
     progress: number;
     rules: string[];
+    type: 'public' | 'private' | 'invite-only';
+    kyc_required?: boolean;
+    age_restriction?: [number, number];
+    regions?: string[];
   } | null>(null);
   const [candidates, setCandidateData] = useState<Candidate[] | null>(null);
 
@@ -152,7 +156,11 @@ const ElectionDetailsPage = () => {
             totalVotes: blockchainVoteCount, 
             participants: response.election.participants,
             progress: response.election.progress,
-            rules: response.election.rules
+            rules: response.election.rules,
+            type: response.election.type,
+            kyc_required: response.election.kyc_required,
+            age_restriction: response.election.age_restriction,
+            regions: response.election.regions,
           };
 
           setElectionData(electionData);
@@ -286,7 +294,7 @@ const ElectionDetailsPage = () => {
       if (dbVoteResponse.hasVoted || blockchainVoteStatus) {
         toast({
           title: 'Vote Confirmation',
-          description: `You have already voted in this election.`,
+          description: `You have already voted in this election.`, 
           duration: 1000,
         });
         return;
@@ -373,6 +381,10 @@ const ElectionDetailsPage = () => {
               participants={election.participants}
               totalVotes={election.totalVotes}
               isActive={isActive}
+              type={election.type}
+              kycRequired={election.kyc_required}
+              ageRestriction={election.age_restriction}
+              regions={election.regions}
             />
           </div>
 
@@ -400,7 +412,7 @@ const ElectionDetailsPage = () => {
         )}
 
         {/* Blockchain Logs Section - Only visible to admin users */}
-        {user?.user_role === 'admin' && (
+        {user?.role === 'admin' && (
           <BlockchainLogs 
             contractAddress={address} 
             network="sepolia"

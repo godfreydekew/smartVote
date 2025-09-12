@@ -1,4 +1,3 @@
-
 import CandidateCard from '@/components/election/CandidateCard';
 import apiClient from '../config';
 import { Vote } from 'lucide-react';
@@ -13,10 +12,14 @@ export interface ElectionRequest {
   status?: 'upcoming' | 'active' | 'completed' | 'cancelled';
   imageURL?: string;
   organization?: string;
-  isPublic: boolean;
-  accessControl: 'csv' | 'manual' | 'invite' | 'public';
+  type: 'public' | 'private' | 'invite-only';
+  kyc_required?: boolean;
+  age_restriction?: [number, number];
+  regions?: string[];
+  invitedEmails?: string[];
+  accessControl? : 'csv' | 'manual' | 'invite' | 'public';
   ownerAddress: string;
-  ownerUserId?: number;
+  ownerUserId?: string;
 }
 
 export interface CandidateRequest {

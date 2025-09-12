@@ -1,14 +1,16 @@
 import { useForm } from 'react-hook-form';
 import { ElectionFormData } from './types';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Upload } from 'lucide-react';
+import { Upload, ChevronDown, ChevronUp } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import { useState } from 'react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface VoterEligibilityStepProps {
   form: ReturnType<typeof useForm<ElectionFormData>>;
@@ -20,7 +22,7 @@ interface VoterEligibilityStepProps {
   handleCsvUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export const VoterEligibilityStep = ({
+export const VoterEligibilityStep = ({ 
   form,
   prevStep,
   nextStep,
@@ -29,53 +31,147 @@ export const VoterEligibilityStep = ({
   csvErrors,
   handleCsvUpload,
 }: VoterEligibilityStepProps) => {
+  const electionType = form.watch('type');
+  const invitedEmails = form.watch('invitedEmails');
+  const [isInvitedEmailsOpen, setIsInvitedEmailsOpen] = useState(electionType === 'invite-only' || (invitedEmails && invitedEmails.length > 0));
+
   return (
     <div className="space-y-4">
-      <FormField
-        control={form.control}
-        name="accessControl"
-        render={({ field }) => (
-          <FormItem className="space-y-3">
-            <FormLabel>Access Control</FormLabel>
-            <FormControl>
-              <RadioGroup
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-                className="flex flex-col space-y-1"
-              >
-                <FormItem className="flex items-center space-x-3 space-y-0">
-                  <FormControl>
-                    <RadioGroupItem value="csv" />
-                  </FormControl>
-                  <FormLabel className="font-normal">Upload CSV with voter emails (max 10MB)</FormLabel>
-                </FormItem>
-                <FormItem className="flex items-center space-x-3 space-y-0">
-                  <FormControl>
-                    <RadioGroupItem value="manual" />
-                  </FormControl>
-                  <FormLabel className="font-normal">Manual entry (tag input field)</FormLabel>
-                </FormItem>
-                <FormItem className="flex items-center space-x-3 space-y-0">
-                  <FormControl>
-                    <RadioGroupItem value="invite" />
-                  </FormControl>
-                  <FormLabel className="font-normal">Invite-only (generates shareable links)</FormLabel>
-                </FormItem>
-                <FormItem className="flex items-center space-x-3 space-y-0">
-                  <FormControl>
-                    <RadioGroupItem value="public" />
-                  </FormControl>
-                  <FormLabel className="font-normal">Public with restrictions</FormLabel>
-                </FormItem>
-              </RadioGroup>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <h2 className="text-2xl font-bold tracking-tight">Voter Eligibility</h2>
+      <p className="text-muted-foreground">
+        Define who is eligible to vote in this election.
+      </p>
 
-      {form.watch('accessControl') === 'csv' && (
-        <div className="border rounded-md p-4 space-y-4">
+      <div className="border rounded-md p-4 space-y-4">
+        <h3 className="text-lg font-semibold mb-2">General Eligibility Criteria</h3>
+        <p className="text-sm text-muted-foreground mb-4">These criteria apply to all voters, regardless of election type.</p>
+
+        <FormField
+          control={form.control}
+          name="kycRequired"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel className="text-base">Require KYC Verification</FormLabel>
+                <FormDescription>Only voters with verified KYC can participate.</FormDescription>
+              </div>
+              <FormControl>
+                <Switch checked={field.value} onCheckedChange={field.onChange} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="ageRestriction"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Age Restriction</FormLabel>
+              <FormControl>
+                <div className="pt-6 pb-2">
+                  <Slider
+                    min={18}
+                    max={120}
+                    step={1}
+                    value={field.value || [18, 120]}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                    }}
+                    defaultValue={[18, 120]} // Explicitly set defaultValue as an array
+                  />
+                </div>
+              </FormControl>
+              <div className="flex justify-between text-sm text-gray-500">
+                <span>Min: {field.value ? field.value[0] : 18}</span>
+                <span>Max: {field.value ? field.value[1] : 120}</span>
+              </div>
+              <FormDescription>Leave default for no age restriction.</FormDescription>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="regions"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Eligible Regions</FormLabel>
+              <Select
+                onValueChange={(value) => {
+                  const current = field.value || [];
+                  if (!current.includes(value)) {
+                    field.onChange([...current, value]);
+                  }
+                }}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Add regions" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="Türkiye">Türkiye</SelectItem>
+                  <SelectItem value="United States">United States</SelectItem>
+                  <SelectItem value="Canada">Canada</SelectItem>
+                  <SelectItem value="United Kingdom">United Kingdom</SelectItem>
+                  <SelectItem value="Australia">Australia</SelectItem>
+                </SelectContent>
+              </Select>
+              {field.value && field.value.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {field.value.map((region) => (
+                    <Badge key={region} variant="secondary">
+                      {region}
+                      <button
+                        type="button"
+                        className="ml-1 hover:text-destructive"
+                        onClick={() => {
+                          field.onChange(field.value!.filter((r) => r !== region));
+                        }}
+                      >
+                        ×
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              )}
+              <FormDescription>Leave empty to allow all regions.</FormDescription>
+            </FormItem>
+          )}
+        />
+      </div>
+
+      <Collapsible open={isInvitedEmailsOpen} onOpenChange={setIsInvitedEmailsOpen} className="space-y-2">
+        <CollapsibleTrigger asChild>
+          <Button variant="outline" className="w-full justify-between">
+            <span>Invite List Management {electionType === 'invite-only' && '(Required)'}</span>
+            {isInvitedEmailsOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="border rounded-md p-4 space-y-4">
+          <p className="text-sm text-muted-foreground mb-4">Only users on this invite list can participate. They must also meet the general eligibility criteria above.</p>
+
+          <FormField
+            control={form.control}
+            name="invitedEmails"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Invited Emails</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Enter invited emails, one per line, or upload a CSV"
+                    className="min-h-[120px]"
+                    value={field.value ? field.value.join('\n') : ''}
+                    onChange={(e) => field.onChange(e.target.value.split('\n').map(email => email.trim()))}
+                  />
+                </FormControl>
+                <FormDescription>List email addresses, one per line.</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <div className="flex items-center justify-center w-full">
             <label
               htmlFor="csv-upload"
@@ -104,120 +200,20 @@ export const VoterEligibilityStep = ({
               <div className="max-h-32 overflow-y-auto bg-gray-50 rounded p-2 text-sm">
                 {csvPreview.map((email, i) => (
                   <div key={i} className={`mb-1 ${csvErrors.includes(email) ? 'text-red-500' : ''}`}>
-                    {email} {csvErrors.includes(email) && '(Invalid)'}
+                    {email}{csvErrors.includes(email) && '(Invalid)'}
                   </div>
                 ))}
               </div>
 
               {csvErrors.length > 0 && (
                 <div className="mt-2 text-red-500 text-sm flex items-center">
-                  <span className="font-medium">{csvErrors.length} invalid emails found.</span>
-                  <Button variant="link" size="sm" className="text-red-500 h-auto p-0 ml-1">
-                    Fix or exclude?
-                  </Button>
+                  <span className="font-medium">{csvErrors.length} invalid emails found and execluded.</span>
                 </div>
               )}
             </div>
           )}
-        </div>
-      )}
-
-      {form.watch('accessControl') === 'public' && (
-        <div className="border rounded-md p-4 space-y-4">
-          <FormField
-            control={form.control}
-            name="ageRestriction"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Minimum Age Requirements</FormLabel>
-                <FormControl>
-                  <div className="pt-6 pb-2">
-                    <Slider
-                      defaultValue={field.value}
-                      max={120}
-                      min={18}
-                      step={1}
-                      onValueChange={field.onChange}
-                    />
-                  </div>
-                </FormControl>
-                <div className="text-right text-sm text-gray-500">{field.value} years or older</div>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="regions"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Eligible Regions</FormLabel>
-                <Select
-                  onValueChange={(value) => {
-                    const current = field.value || [];
-                    if (!current.includes(value)) {
-                      field.onChange([...current, value]);
-                    }
-                  }}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Add regions" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="us">United States</SelectItem>
-                    <SelectItem value="ca">Canada</SelectItem>
-                    <SelectItem value="uk">United Kingdom</SelectItem>
-                    <SelectItem value="au">Australia</SelectItem>
-                  </SelectContent>
-                </Select>
-                {field.value && field.value.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {field.value.map((region) => (
-                      <Badge key={region} variant="secondary">
-                        {region === 'us'
-                          ? 'United States'
-                          : region === 'ca'
-                            ? 'Canada'
-                            : region === 'uk'
-                              ? 'United Kingdom'
-                              : 'Australia'}
-                        <button
-                          type="button"
-                          className="ml-1 hover:text-destructive"
-                          onClick={() => {
-                            field.onChange(field.value!.filter((r) => r !== region));
-                          }}
-                        >
-                          ×
-                        </button>
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-                <FormDescription>Leave empty to allow all regions</FormDescription>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="useCaptcha"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <FormLabel className="text-base">Enable CAPTCHA</FormLabel>
-                  <FormDescription>Helps prevent automated voting</FormDescription>
-                </div>
-                <FormControl>
-                  <Switch checked={field.value} onCheckedChange={field.onChange} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        </div>
-      )}
+        </CollapsibleContent>
+      </Collapsible>
 
       <div className="flex justify-between pt-4">
         <Button type="button" variant="outline" onClick={prevStep}>

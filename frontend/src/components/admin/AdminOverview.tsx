@@ -7,6 +7,9 @@ import { singleElectionContract, electionFactoryContract } from '@/utils/thirdwe
 import { useAuth } from '@/auth/AuthProvider';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { motion } from "framer-motion";
+import { Button } from '@/components/ui/button';
+import { electionService } from '@/api';
+import { useToast } from '@/hooks/use-toast';
 
 // Map frontend states to contract states
 const stateMapping = {
@@ -39,6 +42,7 @@ interface ElectionData {
 
 export const AdminOverview = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
 
   // Get all elections by owner
   const { data: ownerElections, isPending: isOwnerPending } = useReadContract({
@@ -146,6 +150,25 @@ export const AdminOverview = () => {
   const longestElection = findLongestElection(ownerElections);
   const shortestElection = findShortestElection(ownerElections);
   const averageDuration = calculateAverageDuration(ownerElections);
+
+  const handleStartElection = async (electionId: bigint) => {
+    try {
+      await electionService.startElection(Number(electionId));
+      toast({
+        title: 'Election Started',
+        description: 'The election has been successfully started.',
+      });
+      // Optionally, refetch data to update the UI
+      // queryClient.invalidateQueries('ownerElections');
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to start election.',
+        variant: 'destructive',
+      });
+      console.error('Error starting election:', error);
+    }
+  };
 
   if (isOwnerPending || isActivePending || isUpcomingPending || isCompletedPending) {
     return (
@@ -358,6 +381,38 @@ export const AdminOverview = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Upcoming Elections with Start Button */}
+      <Card className="bg-white shadow-sm">
+        <CardHeader className="border-b border-gray-100">
+          <CardTitle className="text-lg font-semibold text-gray-800">Upcoming Elections</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-6">
+          <div className="space-y-4">
+            {adminUpcomingElections.length > 0 ? (
+              adminUpcomingElections.map((election) => (
+                <div key={election.id.toString()} className="p-4 bg-gray-50 rounded-lg border border-gray-100 flex justify-between items-center">
+                  <div>
+                    <p className="font-medium text-gray-900">{election.title}</p>
+                    <p className="text-sm text-gray-500">
+                      Starts: {new Date(Number(election.startTime) * 1000).toLocaleString()}
+                    </p>
+                  </div>
+                  <Button 
+                    onClick={() => handleStartElection(election.id)}
+                    variant="outline"
+                    size="sm"
+                  >
+                    Start Now
+                  </Button>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500 text-center py-4">No upcoming elections</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
-}; 
+};
