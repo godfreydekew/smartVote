@@ -63,7 +63,7 @@ export const DashboardHero = () => {
         >
           <motion.div variants={itemVariants}>
             <h1 className="text-2xl md:text-3xl font-bold mb-3">
-              Welcome to SmartVote
+              Welcome to Şeffaf Katılım
             </h1>
             <p className="text-white/90 text-sm md:text-base max-w-2xl mx-auto mb-6">
               Your voice matters. Participate in active elections and shape decisions that impact our community.

@@ -74,7 +74,7 @@ const HowItWorks = () => {
           </motion.div>
 
           <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-700">
-            How SmartVote <span className="bg-gradient-to-r from-vote-blue to-vote-teal bg-clip-text text-transparent">Works</span>
+            How Şeffaf Katılım <span className="bg-gradient-to-r from-vote-blue to-vote-teal bg-clip-text text-transparent">Works</span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
             Our streamlined process ensures secure, transparent, and accessible voting for everyone.

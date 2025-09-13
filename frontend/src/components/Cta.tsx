@@ -75,7 +75,7 @@ const Cta = () => {
               className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed"
             >
               Whether you're running a national election, corporate voting, or university elections, 
-              SmartVote provides the security and transparency you need.
+              Şeffaf Katılım provides the security and transparency you need.
             </motion.p>
 
             <motion.div 

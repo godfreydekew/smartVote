@@ -23,8 +23,8 @@ const faqData = [
     color: "from-vote-blue to-vote-teal"
   },
   {
-    question: "How does SmartVote ensure voter privacy?",
-    answer: "SmartVote uses advanced cryptographic techniques including zero-knowledge proofs that allow voters to verify their vote was counted correctly without revealing who they voted for. The system separates voter identity verification from the actual voting process to ensure complete anonymity.",
+    question: "How does Şeffaf Katılım ensure voter privacy?",
+    answer: "Şeffaf Katılım uses advanced cryptographic techniques including zero-knowledge proofs that allow voters to verify their vote was counted correctly without revealing who they voted for. The system separates voter identity verification from the actual voting process to ensure complete anonymity.",
     color: "from-indigo-500 to-vote-blue"
   },
   {
@@ -38,8 +38,8 @@ const faqData = [
     color: "from-vote-blue to-cyan-500"
   },
   {
-    question: "Is SmartVote accessible to all voters?",
-    answer: "Yes, SmartVote is designed with accessibility as a priority. The platform complies with WCAG 2.1 AA standards, supports screen readers, offers keyboard navigation, and provides interfaces in multiple languages. For voters without internet access, we work with election authorities to provide voting kiosks at traditional polling locations.",
+    question: "Is Şeffaf Katılım accessible to all voters?",
+    answer: "Yes, Şeffaf Katılım is designed with accessibility as a priority. The platform complies with WCAG 2.1 AA standards, supports screen readers, offers keyboard navigation, and provides interfaces in multiple languages. For voters without internet access, we work with election authorities to provide voting kiosks at traditional polling locations.",
     color: "from-vote-teal to-emerald-500"
   }
 ];

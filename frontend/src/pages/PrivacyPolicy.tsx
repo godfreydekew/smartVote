@@ -63,14 +63,14 @@ const PrivacyPolicy = () => {
             <section>
               <h2 className="text-xl font-semibold mb-4 text-vote-blue">1. Acceptance of Terms</h2>
               <p className="text-gray-600 leading-relaxed">
-                By accessing and using Smart Vote's services, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.
+                By accessing and using Şeffaf Katılım's services, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.
               </p>
             </section>
 
             <section>
               <h2 className="text-xl font-semibold mb-4 text-vote-blue">2. Description of Service</h2>
               <p className="text-gray-600 leading-relaxed">
-                Smart Vote provides a blockchain-based voting platform that enables secure, transparent, and accessible voting for various purposes including entertainment, corporate governance, and institutional elections.
+                Şeffaf Katılım provides a blockchain-based voting platform that enables secure, transparent, and accessible voting for various purposes including entertainment, corporate governance, and institutional elections.
               </p>
             </section>
 
@@ -84,7 +84,7 @@ const PrivacyPolicy = () => {
             <section>
               <h2 className="text-xl font-semibold mb-4 text-vote-blue">4. Service Modifications</h2>
               <p className="text-gray-600 leading-relaxed">
-                Smart Vote reserves the right to modify or discontinue any aspect of the service at any time. We will provide reasonable notice of any significant changes.
+                Şeffaf Katılım reserves the right to modify or discontinue any aspect of the service at any time. We will provide reasonable notice of any significant changes.
               </p>
             </section>
 

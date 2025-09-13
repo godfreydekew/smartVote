@@ -20,7 +20,7 @@ async function sendInvitationEmail(email, election) {
       <p>You have been invited to vote in the election: <strong>${election.title}</strong>.</p>
       <p>The election starts on ${new Date(election.start_date).toLocaleDateString()} and ends on ${new Date(election.end_date).toLocaleDateString()}.</p>
       <p>Please log in to the platform to cast your vote.</p>
-      <a href="${process.env.FRONTEND_URL}/login">Go to SmartVote</a>
+      <a href="${process.env.FRONTEND_URL}/login">Go to Şeffaf Katılım</a>
     `,
   };
 
