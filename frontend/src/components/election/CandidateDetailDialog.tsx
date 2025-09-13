@@ -23,6 +23,8 @@ interface CandidateDetailDialogProps {
   isActive: boolean;
   isCompleted: boolean;
   totalVotes: number;
+  isEligible: boolean;
+  hasUserVoted: boolean;
 }
 
 const CandidateDetailDialog: React.FC<CandidateDetailDialogProps> = ({
@@ -32,7 +34,9 @@ const CandidateDetailDialog: React.FC<CandidateDetailDialogProps> = ({
   onVote,
   isActive,
   isCompleted,
-  totalVotes
+  totalVotes,
+  isEligible,
+  hasUserVoted,
 }) => {
   if (!candidate) return null;
 
@@ -149,13 +153,24 @@ const CandidateDetailDialog: React.FC<CandidateDetailDialogProps> = ({
             )} */}
           </div>
           
-          {isActive && (
+          {isActive && isEligible && !hasUserVoted && (
             <div className="mt-6">
               <Button 
                 onClick={() => onVote(candidate)} 
                 className="w-full"
+                disabled={!isEligible || hasUserVoted}
               >
                 Vote for {candidate.name}
+              </Button>
+            </div>
+          )}
+          {isActive && hasUserVoted && (
+            <div className="mt-6">
+              <Button 
+                className="w-full"
+                disabled
+              >
+                Voted
               </Button>
             </div>
           )}

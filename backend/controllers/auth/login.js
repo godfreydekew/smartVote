@@ -3,6 +3,7 @@ const yup = require('yup');
 
 const { saveSessionData } = require('../utils/session.js');
 const { getUserByEmail } = require('../../database/queries/userQueries.js');
+const { linkInvitedUser } = require('../../database/queries/elections/linkInvitedUser.js');
 const { startKYCSession } = require('../utils/kycService.js');
 
 const loginSchema = yup.object().shape({
@@ -21,6 +22,9 @@ const login = async (req, res) => {
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
+
+    // Check for pending invitations and link them to the new user account
+    await linkInvitedUser(user.id, user.email);
 
     console.log('User found:', user.id);
     // If user has an existing KYC session, reuse it

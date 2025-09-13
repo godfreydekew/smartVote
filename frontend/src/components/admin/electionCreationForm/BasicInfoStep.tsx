@@ -36,7 +36,7 @@ const basicInfoSchema = z.object({
       return date >= minStartDate;
     }, 'Start time must be at least 2 minutes ahead'),
   endDate: z.date(),
-  isPublic: z.boolean()
+  type: z.enum(['public', 'private', 'invite-only'])
 }).refine((data) => {
   return data.endDate > data.startDate;
 }, {
@@ -63,7 +63,8 @@ export const BasicInfoStep = ({ form, nextStep }: BasicInfoStepProps) => {
       'rules',
       'organization',
       'startDate',
-      'endDate'
+      'endDate',
+      'type'
     ]);
     
     if (isValid) {
@@ -202,31 +203,26 @@ export const BasicInfoStep = ({ form, nextStep }: BasicInfoStepProps) => {
 
         <FormField
           control={form.control}
-          name="isPublic"
+          name="type"
           render={({ field }) => (
             <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
               <div className="space-y-0.5">
-                <FormLabel className="text-base">
-                  {field.value ? (
-                    <div className="flex items-center">
-                      <Globe className="w-4 h-4 mr-2" />
-                      Public Election
-                    </div>
-                  ) : (
-                    <div className="flex items-center">
-                      <Lock className="w-4 h-4 mr-2" />
-                      Private Election
-                    </div>
-                  )}
-                </FormLabel>
+                <FormLabel className="text-base">Election Type</FormLabel>
                 <FormDescription>
-                  {field.value
-                    ? 'Anyone can participate (with optional restrictions)'
-                    : 'Only invited voters can participate (voter list required)'}
+                  Define the visibility and access control for your election.
                 </FormDescription>
               </div>
               <FormControl>
-                <Switch checked={field.value} onCheckedChange={field.onChange} />
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="public">Public</SelectItem>
+                    <SelectItem value="private">Private</SelectItem>
+                    <SelectItem value="invite-only">Invite-Only</SelectItem>
+                  </SelectContent>
+                </Select>
               </FormControl>
             </FormItem>
           )}
@@ -238,7 +234,7 @@ export const BasicInfoStep = ({ form, nextStep }: BasicInfoStepProps) => {
             type="button" 
             onClick={handleNext}
           >
-            Next: Candidates
+            Next: Voter Eligibility
           </Button>
         </div>
       </div>

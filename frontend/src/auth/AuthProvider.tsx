@@ -4,14 +4,27 @@ import { apiClient } from '@/api';
 import { useActiveAccount } from 'thirdweb/react';
 import { useProfiles } from 'thirdweb/react';
 import { client } from '@/utils/thirdweb-client';
+import { createSemaphoreIdentity, getIdentityCommitment } from '@/utils/semaphore';
+import userService from '@/api/services/userService';
 import { cp } from 'fs';
+
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  user_role: string;
+  address?: string;
+  identitycommitment?: string;
+  kyc_session_id?: string;
+}
 
 interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string, address?: any) => Promise<void>;
+  login: (email: string, password: string, address?: string) => Promise<void>;
   logout: () => Promise<void>;
-  user: any;
+  user: User | null;
+  identitycommitment: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -20,9 +33,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [identitycommitment, setIdentityCommitment] = useState<string | null>(null);
   const account = useActiveAccount();
   const { data: profiles, isLoading: profilesLoading } = useProfiles({ client });
+
+  // Load existing identity commitment on mount
+  useEffect(() => {
+    const existingCommitment = getIdentityCommitment();
+    if (existingCommitment) {
+      setIdentityCommitment(existingCommitment);
+    }
+  }, []);
 
   // Check session on initial load
   useEffect(() => {
@@ -54,10 +76,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Sync account address to user when it becomes available
   useEffect(() => {
     if (account?.address) {
-      setUser((prev: any) => ({
+      setUser((prev: User | null) => ({
         ...prev,
         address: account.address,
-      }));
+      } as User));
     }
   }, [account?.address]);
 
@@ -67,6 +89,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // cnsole.log('Login response:', response.data.user);
       setUser(response.data.user);
       setIsAuthenticated(true);
+      console.log('Login response:', response.data.user);
+
+      if (!response.data.user.identitycommitment) {
+        // Generate Semaphore identity for anonymous voting
+        const commitment = createSemaphoreIdentity();
+        setIdentityCommitment(commitment);
+        
+        // Update user with identity commitment
+        try {
+          await userService.updateIdentityCommitment(response.data.user.id, commitment);
+          console.log('Identity commitment updated for user');
+        } catch (updateError) {
+          console.error('Failed to update identity commitment:', updateError);
+        }
+      } else {
+        const existingCommitment = getIdentityCommitment();
+        if (existingCommitment) {
+          setIdentityCommitment(existingCommitment);
+        } else {
+          // If no stored identity but user has commitment in DB, create new one
+          const commitment = createSemaphoreIdentity();
+          setIdentityCommitment(commitment);
+        }
+      }
+      
       navigate('/dashboard');
       // if (response.data.kycUrl && !response.data.user.kyc_session_id) {
       //   // Redirect to KYC flow
@@ -89,10 +136,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
     setIsAuthenticated(false);
     setUser(null);
+    setIdentityCommitment(null);
+    // Note: Identity is kept in localStorage for persistence
     navigate('/');
   };
 
-  return <AuthContext.Provider value={{ isAuthenticated, isLoading, login, logout, user }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ isAuthenticated, isLoading, login, logout, user, identitycommitment }}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {

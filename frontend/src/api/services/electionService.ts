@@ -1,4 +1,3 @@
-
 import CandidateCard from '@/components/election/CandidateCard';
 import apiClient from '../config';
 import { Vote } from 'lucide-react';
@@ -13,10 +12,14 @@ export interface ElectionRequest {
   status?: 'upcoming' | 'active' | 'completed' | 'cancelled';
   imageURL?: string;
   organization?: string;
-  isPublic: boolean;
-  accessControl: 'csv' | 'manual' | 'invite' | 'public';
+  type: 'public' | 'private' | 'invite-only';
+  kyc_required?: boolean;
+  age_restriction?: [number, number];
+  regions?: string[];
+  invitedEmails?: string[];
+  accessControl? : 'csv' | 'manual' | 'invite' | 'public';
   ownerAddress: string;
-  ownerUserId?: number;
+  ownerUserId?: string;
 }
 
 export interface CandidateRequest {
@@ -84,7 +87,12 @@ const electionService = {
   vote: async (electionId: number) => {
     const response = await apiClient.put(`/admin/election/vote/${electionId}`);
     return response.data;
-  }
+  },
+
+  isEligible: async (electionId: number): Promise<{ isEligible: boolean }> => {
+    const response = await apiClient.get(`/admin/election/is-eligible/${electionId}`);
+    return response.data;
+  },
 
   // updateElection: async (id: number, updates: Partial<ElectionRequest>) => {
   //   const response = await apiClient.patch<ElectionResponse>(`/admin/election/${id}`, updates);

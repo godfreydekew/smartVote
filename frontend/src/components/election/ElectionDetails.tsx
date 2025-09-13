@@ -1,15 +1,19 @@
-import React from 'react';
-import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Calendar, CheckCircle2, Users, Clock } from "lucide-react";
-import { format, formatDistance } from 'date-fns';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { format } from 'date-fns';
+import { Users, Calendar, CheckCircle, XCircle, Globe, Lock, Mail, ShieldCheck, User, MapPin } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface ElectionDetailsProps {
-  startDate: string | Date;
-  endDate: string | Date;
+  startDate: Date;
+  endDate: Date;
   participants: number;
   totalVotes: number;
   isActive: boolean;
+  type: 'public' | 'private' | 'invite-only';
+  kycRequired?: boolean;
+  ageRestriction?: [number, number];
+  regions?: string[];
 }
 
 const formatDateTime = (date: string | Date) => {
@@ -20,80 +24,116 @@ const formatDateTime = (date: string | Date) => {
   return {
     date: format(d, 'MMM dd, yyyy'),
     time: format(d, 'h:mm a'),
-    fullDateTime: format(d, 'MMM dd, yyyy h:mm a'),
-    relative: formatDistance(d, new Date(), { addSuffix: true })
+    fullDateTime: format(d, 'MMM dd, yyyy h:mm a')
   };
 };
 
-const ElectionDetails: React.FC<ElectionDetailsProps> = ({
+const ElectionDetails = ({
   startDate,
   endDate,
   participants,
   totalVotes,
-  isActive
-}) => {
-  const start = formatDateTime(startDate);
-  const end = formatDateTime(endDate);
+  isActive,
+  type,
+  kycRequired,
+  ageRestriction,
+  regions,
+}: ElectionDetailsProps) => {
+  const formattedStartDate = formatDateTime(startDate);
+  const formattedEndDate = formatDateTime(endDate);
 
   return (
-    <Card className="overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-      <div className="p-4 sm:p-6 border-b bg-gray-50/50">
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Election Details</h2>
-      </div>
-      <CardContent className="p-4 sm:p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {/* Start Date */}
-          <div className="flex items-start gap-4 p-3 rounded-lg bg-gray-50/50 hover:bg-gray-50 transition-colors duration-200">
-            <div className="p-2 rounded-lg bg-blue-500/10">
-              <Calendar className="h-5 w-5 text-blue-600" />
-            </div>
+    <Card className="shadow-sm">
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold">Election Overview</CardTitle>
+      </CardHeader>
+      <CardContent className="grid gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex items-center space-x-3">
+            <Calendar className="h-5 w-5 text-muted-foreground" />
             <div>
-              <p className="font-semibold text-gray-900 text-sm sm:text-base">Start Date</p>
-              <p className="text-gray-700 text-sm sm:text-base mt-1">
-                {start.date} <span className="text-gray-500">at {start.time}</span>
-              </p>
-              <p className="text-xs text-gray-500 mt-1.5">{start.relative}</p>
+              <p className="text-sm text-muted-foreground">Start Date</p>
+              <p className="font-medium">{formattedStartDate.fullDateTime}</p>
             </div>
           </div>
-          
-          {/* End Date */}
-          <div className="flex items-start gap-4 p-3 rounded-lg bg-gray-50/50 hover:bg-gray-50 transition-colors duration-200">
-            <div className="p-2 rounded-lg bg-blue-500/10">
-              <Clock className="h-5 w-5 text-blue-600" />
-            </div>
+          <div className="flex items-center space-x-3">
+            <Calendar className="h-5 w-5 text-muted-foreground" />
             <div>
-              <p className="font-semibold text-gray-900 text-sm sm:text-base">End Date</p>
-              <p className="text-gray-700 text-sm sm:text-base mt-1">
-                {end.date} <span className="text-gray-500">at {end.time}</span>
-              </p>
-              <p className="text-xs text-gray-500 mt-1.5">{end.relative}</p>
-            </div>
-          </div>
-
-          {/* Participants */}
-          <div className="flex items-start gap-4 p-3 rounded-lg bg-gray-50/50 hover:bg-gray-50 transition-colors duration-200">
-            <div className="p-2 rounded-lg bg-blue-500/10">
-              <Users className="h-5 w-5 text-blue-600" />
-            </div>
-            <div>
-              <p className="font-semibold text-gray-900 text-sm sm:text-base">Eligible Participants</p>
-              <p className="text-gray-700 text-sm sm:text-base mt-1">{participants.toLocaleString()}</p>
-              <p className="text-xs text-gray-500 mt-1.5">Registered voters</p>
-            </div>
-          </div>
-
-          {/* Votes */}
-          <div className="flex items-start gap-4 p-3 rounded-lg bg-gray-50/50 hover:bg-gray-50 transition-colors duration-200">
-            <div className="p-2 rounded-lg bg-blue-500/10">
-              <CheckCircle2 className="h-5 w-5 text-blue-600" />
-            </div>
-            <div>
-              <p className="font-semibold text-gray-900 text-sm sm:text-base">Total Votes Cast</p>
-              <p className="text-gray-700 text-sm sm:text-base mt-1">{totalVotes.toLocaleString()}</p>
+              <p className="text-sm text-muted-foreground">End Date</p>
+              <p className="font-medium">{formattedEndDate.fullDateTime}</p>
             </div>
           </div>
         </div>
 
+        <Separator />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex items-center space-x-3">
+            <Users className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <p className="text-sm text-muted-foreground">Participants</p>
+              <p className="font-medium">{participants}</p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3">
+            <CheckCircle className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <p className="text-sm text-muted-foreground">Total Votes</p>
+              <p className="font-medium">{totalVotes}</p>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Election Type & Eligibility</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex items-center space-x-3">
+              {type === 'public' && <Globe className="h-5 w-5 text-blue-500" />}
+              {type === 'private' && <Lock className="h-5 w-5 text-red-500" />}
+              {type === 'invite-only' && <Mail className="h-5 w-5 text-yellow-500" />}
+              <div>
+                <p className="text-sm text-muted-foreground">Election Type</p>
+                <p className="font-medium capitalize">{type} Election</p>
+              </div>
+            </div>
+
+            {kycRequired !== undefined && (
+              <div className="flex items-center space-x-3">
+                <ShieldCheck className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">KYC Required</p>
+                  <p className="font-medium">{kycRequired ? 'Yes' : 'No'}</p>
+                </div>
+              </div>
+            )}
+
+            {ageRestriction && ageRestriction.length === 2 && (
+              <div className="flex items-center space-x-3">
+                <User className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Age Restriction</p>
+                  <p className="font-medium">{ageRestriction[0]} - {ageRestriction[1]} years old</p>
+                </div>
+              </div>
+            )}
+
+            {regions && regions.length > 0 && (
+              <div className="flex items-center space-x-3">
+                <MapPin className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Eligible Regions</p>
+                  <div className="flex flex-wrap gap-1">
+                    {regions.map((region) => (
+                      <Badge key={region} variant="secondary">{region}</Badge>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

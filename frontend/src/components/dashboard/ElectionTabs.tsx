@@ -28,6 +28,7 @@ interface Election {
   status: 'active' | 'upcoming' | 'completed';
   date: string;
   address: string;
+  type: 'public' | 'private' | 'invite-only';
 }
 
 interface ElectionData {
@@ -87,13 +88,18 @@ export const ElectionTabs = memo(() => {
       try {
         setIsLoading(true);
         const response = await electionService.getElections();
+        const dbElections = response.elections;
         
         // Combine contract data with database metadata
         const formatElections = (contractData: ElectionData[] | undefined, status: 'active' | 'upcoming' | 'completed') => {
           if (!contractData) return [];
           
-          return contractData.map((item: ElectionData) => {
-            const dbElection = response.elections?.find(e => e.id === Number(item.id));
+          const filteredContractData = contractData.filter(contractElection => 
+            dbElections.some(dbElection => Number(dbElection.id) === Number(contractElection.id))
+          );
+
+          return filteredContractData.map((item: ElectionData) => {
+            const dbElection = dbElections.find(e => e.id === Number(item.id));
             return {
               id: item.id.toString(),
               title: item.title,
@@ -102,6 +108,7 @@ export const ElectionTabs = memo(() => {
               status: status,
               date: new Date(Number(item.startTime) * 1000).toLocaleDateString(),
               address: item.electionAddress,
+              type: dbElection?.type || 'public',
             };
           });
         };
@@ -112,7 +119,7 @@ export const ElectionTabs = memo(() => {
           // For admin, use ownerElections and determine status based on timestamps
           if (ownerElections) {
             allElections = (ownerElections as ElectionData[]).map((item: ElectionData) => {
-              const dbElection = response.elections?.find(e => e.id === Number(item.id));
+              const dbElection = dbElections.find(e => e.id === Number(item.id));
               const now = Math.floor(Date.now() / 1000);
               let status: 'active' | 'upcoming' | 'completed';
               
@@ -132,6 +139,7 @@ export const ElectionTabs = memo(() => {
                 status,
                 date: new Date(Number(item.startTime) * 1000).toLocaleDateString(),
                 address: item.electionAddress,
+                type: dbElection?.type || 'public',
               };
             });
           }

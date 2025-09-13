@@ -1,4 +1,5 @@
 const { recordVote, checkHasVoted } = require('../../database/queries/elections/recordVotes.js');
+const { isUserEligible } = require('../../database/queries/elections/isUserEligible.js');
 const { DatabaseError, handlePostgresError } = require('../../database/utils/errors.js');
 
 const postVote = async (req, res) => {
@@ -6,6 +7,11 @@ const postVote = async (req, res) => {
   const userId = req.session.user.id;
 
   try {
+    const eligible = await isUserEligible(electionId, userId);
+    if (!eligible) {
+      return res.status(403).json({ message: 'User is not eligible to vote in this election' });
+    }
+
     const updatedElection = await recordVote(electionId, userId);
 
     if (!updatedElection) {

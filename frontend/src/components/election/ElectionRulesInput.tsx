@@ -93,7 +93,7 @@ const ElectionRulesInput: React.FC<ElectionRulesInputProps> = ({
                   type="button"
                   variant="outline"
                   onClick={() => field.onChange([
-                    ...field.value,
+                    ...field.value.filter(rule => rule.trim() !== ''),
                     'Each voter can vote only once',
                     'Voting is anonymous',
                     'Results will be published after election ends'

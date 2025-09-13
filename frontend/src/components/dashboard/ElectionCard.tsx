@@ -1,6 +1,8 @@
 import React, { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Globe, Lock, Mail } from 'lucide-react';
 
 interface ElectionCardProps {
   id: string;
@@ -10,9 +12,10 @@ interface ElectionCardProps {
   status: 'active' | 'upcoming' | 'completed';
   date: string;
   address: string;
+  type: 'public' | 'private' | 'invite-only';
 }
 
-const ElectionCard = memo(({ id, title, description, imageUrl, status, date, address }: ElectionCardProps) => {
+const ElectionCard = memo(({ id, title, description, imageUrl, status, date, address, type }: ElectionCardProps) => {
   const navigate = useNavigate();
   
   const getStatusStyles = (status: 'active' | 'upcoming' | 'completed') => {
@@ -38,7 +41,13 @@ const ElectionCard = memo(({ id, title, description, imageUrl, status, date, add
     <Card onClick={handleCardClick} className="cursor-pointer transition-shadow hover:shadow-md overflow-hidden h-full">
       <div className="h-40 md:h-56 bg-cover bg-center relative" style={{ backgroundImage: `url(${imageUrl})` }}>
         <div className="absolute inset-0 bg-black/40" />
-        <div className="absolute top-4 right-4">
+        <div className="absolute top-4 right-4 flex items-center gap-2">
+            <Badge variant="default" className="capitalize">
+              {type === 'public' && <Globe className="h-5 w-5 mr-1 text-white-500" />}
+              {type === 'private' && <Lock className="h-5 w-5 mr-1 text-white-500" />}
+              {type === 'invite-only' && <Mail className="h-5 w-5 mr-1 text-white-500" />}
+              {type}
+            </Badge>
           <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusStyles}`}>
             {status.charAt(0).toUpperCase() + status.slice(1)}
           </span>
