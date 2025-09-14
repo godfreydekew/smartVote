@@ -131,8 +131,7 @@ async function createTables() {
         CREATE TABLE IF NOT EXISTS vote_log (
             time TIMESTAMPTZ NOT NULL,
             election_id INTEGER REFERENCES elections(id) ON DELETE CASCADE,
-            candidate_id INTEGER REFERENCES candidates(id) ON DELETE CASCADE,
-            user_id INTEGER REFERENCES users(id) ON DELETE SET NULL
+            candidate_id INTEGER REFERENCES candidates(id) ON DELETE CASCADE
         );
     `);
 

@@ -12,11 +12,13 @@ const electionRoutes = require('./routes/electionRoutes.js');
 const kycRoutes = require('./routes/kyc.js');
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const { createTables } = require('./database/migrations/createTables.js');
+//const { dropTables } = require('./database/migrations/dropTables.js');
 
 const app = express();
 const server = createServer(app);
 const port = 3001;
 
+//dropTables()
 createTables()
 
 app.use(express.json());

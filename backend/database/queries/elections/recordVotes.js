@@ -15,9 +15,9 @@ async function recordVote(electionId, userId, candidateId) {
     );
 
     await client.query(
-      `INSERT INTO vote_log (time, election_id, user_id, candidate_id)
-       VALUES (NOW(), $1, $2, $3)`,
-      [electionId, userId, candidateId]
+      `INSERT INTO vote_log (time, election_id, candidate_id)
+       VALUES (date_trunc('minute', NOW()), $1, $2)`,
+      [electionId, candidateId]
     );
 
     const result = await pool.query(
