@@ -43,6 +43,7 @@ const Login = () => {
   const account = useActiveAccount();
   const { data: profiles, isLoading: profilesLoading } = useProfiles({ client });
   const [isInitializing, setIsInitializing] = useState(true);
+  const [isAutoFilled, setIsAutoFilled] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const location = useLocation();
   const from = location.state?.from?.pathname || '/dashboard';
@@ -71,10 +72,11 @@ const Login = () => {
 
   // Auto-fill email if verified through Connect component
   useEffect(() => {
-    if (account?.address && profiles?.[0]?.details?.email) {
+    if (account?.address && profiles?.[0]?.details?.email && !isAutoFilled) {
       setValue('email', profiles[0].details.email);
+      setIsAutoFilled(true);
     }
-  }, [account, profiles, setValue]);
+  }, [account, profiles, setValue, isAutoFilled]);
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -156,7 +158,7 @@ const Login = () => {
                   className="mt-1 h-12 rounded-xl border-gray-200 focus:border-vote-blue focus:ring-vote-blue/20 transition-all"
                   placeholder="Enter your email"
                   {...register('email')}
-                  disabled={isSubmitting || !!account?.address}
+                  disabled={isSubmitting}
                 />
                 {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
               </div>
