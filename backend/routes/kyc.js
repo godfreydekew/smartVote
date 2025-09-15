@@ -12,27 +12,29 @@ router.post('/start', async (req, res) => {
     return res.status(400).json({ error: 'User ID is required' });
   }
 
-  // Configure Didit API request
-  const options = {
-    method: 'POST',
-    url: 'https://verification.didit.me/v2/session/',
-    headers: {
-      accept: 'application/json',
-      'content-type': 'application/json',
-      'x-api-key': process.env.DIDIT_API_KEY,
-    },
-    data: {
-      workflow_id: process.env.DIDIT_WORKFLOW_ID,
-      callback: process.env.DIDIT_CALLBACK_URL,
-      vendor_data: userId.toString(),
-    },
-  };
-
   try {
-    // Create new verification session
-    const response = await axios.request(options);
-    const { session_id, url } = response.data;
-    res.json({ sessionId: session_id, verificationUrl: url });
+    // A placeholder for the session ID that Didit will generate.
+    const sessionIdPlaceholder = '{{SESSION_ID}}';
+    const callbackUrl = `${process.env.DIDIT_CALLBACK_URL}?sessionId=${sessionIdPlaceholder}`;
+
+    const response = await axios.post(
+      'https://verification.didit.me/v2/session/',
+      {
+        workflow_id: process.env.DIDIT_WORKFLOW_ID,
+        vendor_data: userId.toString(),
+        callback: callbackUrl,
+      },
+      {
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+          'x-api-key': process.env.DIDIT_API_KEY,
+        },
+      }
+    );
+
+    res.json(response.data);
+
   } catch (error) {
     console.error('Error initiating KYC session:', error.response?.data || error.message);
     res.status(500).json({ error: 'Failed to initiate KYC session' });
@@ -55,16 +57,15 @@ router.get('/result/:sessionId', async (req, res) => {
       }
     );
 
-    const { status } = response.data;
+    // Return the full response data, which includes the status
+    res.json(response.data);
 
-    // Return result only if verification is approved
-    if (status === 'Approved') {
-      res.json({ data: response.data });
-    } else {
-      res.status(400).json({ error: 'Verification not confirmed yet' });
-    }
   } catch (error) {
     console.error('Error retrieving KYC result:', error.response?.data || error.message);
+    // Distinguish between a pending result and a true error
+    if (error.response && error.response.status === 404) {
+        return res.status(202).json({ status: 'Pending', message: 'Verification result is not yet available.' });
+    }
     res.status(500).json({ error: 'Failed to retrieve KYC result' });
   }
 });
@@ -113,6 +114,7 @@ router.post('/webhook', async (req, res) => {
     if (status === 'Approved') {
       await updateUserKYCSession(userId, session_id);
     } else {
+      // For any other status (Rejected, Expired, etc.), ensure KYC is not marked as verified
       await updateUserKYCSession(userId, null);
     }
     res.status(200).end();

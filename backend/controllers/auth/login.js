@@ -28,15 +28,15 @@ const login = async (req, res) => {
 
     console.log('User found:', user.id);
     // If user has an existing KYC session, reuse it
-    // if (user.kyc_session_id) {
-    //   req.session.kycSessionId = user.kyc_session_id;
-    //   saveSessionData(req, user);
-    //   return res.status(200).json({ user, kycUrl: null });
-    // }
+    if (user.kyc_session_id) {
+      req.session.kycSessionId = user.kyc_session_id;
+      saveSessionData(req, user);
+      return res.status(200).json({ user, kycUrl: null });
+    }
     
     // Otherwise, start a new KYC session via DIDit API
-    // const kycSession = await startKYCSession(user.id);
-    // req.session.kycSessionId = kycSession.session_id;
+    const kycSession = await startKYCSession(user.id);
+    req.session.kycSessionId = kycSession.session_id;
     saveSessionData(req, user);
 
     res.status(200).json({ user });

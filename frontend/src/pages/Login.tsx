@@ -99,8 +99,6 @@ const Login = () => {
         description: 'You are now logged in.',
         variant: 'success',
       });
-
-      navigate('/dashboard');
     } catch (error: unknown) {
       console.error('Login error:', error);
       const loginError = error as LoginError;

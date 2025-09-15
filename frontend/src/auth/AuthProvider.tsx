@@ -9,6 +9,11 @@ import userService from '@/api/services/userService';
 import { cp } from 'fs';
 
 interface User {
+  age: number;
+  created_at: string;
+  country_of_residence: string;
+  full_name: string;
+  kyc_verified: boolean;
   id: string;
   email: string;
   name: string;
@@ -35,6 +40,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [identitycommitment, setIdentityCommitment] = useState<string | null>(null);
+  const [kycRedirectShownInSession, setKycRedirectShownInSession] = useState(false);
   const account = useActiveAccount();
   const { data: profiles, isLoading: profilesLoading } = useProfiles({ client });
 
@@ -46,6 +52,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  // Reset KYC session flag when thirdweb account changes
+  useEffect(() => {
+    setKycRedirectShownInSession(false);
+  }, [account?.address]);
+
   // Check session on initial load
   useEffect(() => {
     const checkSession = async () => {
@@ -54,39 +65,43 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           withCredentials: true,
         });
 
-        const isVerified = response.data.user?.kyc_session_id !== null;
+        if (response.data && response.data.user) {
 
-        // fallback in case account is ready early
-        setUser({
-          ...response.data.user,
-          address: account?.address || null,
-        });
-
-        setIsAuthenticated(isVerified);
+          // fallback in case account is ready early
+          setUser({
+            ...response.data.user,
+            address: account?.address || null,
+          });
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+          setUser(null);
+        }
       } catch (error) {
         // console.error('Session check failed:', error);
         setIsAuthenticated(false);
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
     };
     checkSession();
-  }, []);
+  }, [account?.address]);
 
   // Sync account address to user when it becomes available
   useEffect(() => {
     if (account?.address) {
-      setUser((prev: User | null) => ({
-        ...prev,
-        address: account.address,
-      } as User));
+      setUser((prev: User | null) => {
+        if (!prev) return null;
+        return { ...prev, address: account.address };
+      });
     }
   }, [account?.address]);
 
   const login = async (email: string, password: string) => {
     try {
       const response = await apiClient.post(`user/login`, { email, password });
-      // cnsole.log('Login response:', response.data.user);
+      // console.log('Login response:', response.data.user);
       setUser(response.data.user);
       setIsAuthenticated(true);
       console.log('Login response:', response.data.user);
@@ -114,16 +129,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
       }
       
-      navigate('/dashboard');
-      // if (response.data.kycUrl && !response.data.user.kyc_session_id) {
-      //   // Redirect to KYC flow
-      //   window.location.href = response.data.kycUrl;
-      //   // setIsAuthenticated(true);
-      // } else {
-      //   setUser(response.data.user);
-      //   setIsAuthenticated(true);
-      //   navigate('/dashboard');
-      // }
+      if (response.data.user.kyc_verified === false && !kycRedirectShownInSession) {
+        setKycRedirectShownInSession(true);
+        navigate('/kyc');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error) {
       setIsAuthenticated(false);
       throw error;

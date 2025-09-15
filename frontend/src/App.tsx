@@ -23,6 +23,8 @@ import ProtectedRoute from "./auth/ProtectedRoute";
 import { ThirdwebProvider } from "thirdweb/react";
 import { AdminRoute } from "./auth/AdminRoute";
 import Unauthorized from "./pages/Unauthorized";
+import KYCCallback from "./pages/KYCCallback";
+import KYC from "./pages/KYC";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +40,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/kyc" element={<KYC />} />
+            <Route path="/kyc-callback" element={<KYCCallback />} />
             <Route path="/forgot-password" element={<ForgotPassword/>} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />

@@ -6,14 +6,14 @@ const logout = async (req, res) => {
     console.log('Logging out user:', req.session.user);
 
     // Clear user session data Kyc
-    // if (req.session.user?.kyc_session_id) {
-    //   await deleteKYCSession(req.session.user.kyc_session_id);
-    //   await updateUserKYCSession(req.session.user.id, null);
-    // }
+    if (req.session.user?.kyc_session_id) {
+      await deleteKYCSession(req.session.user.kyc_session_id);
+      await updateUserKYCSession(req.session.user.id, null);
+    }
 
     req.session.destroy(err => {
       if (err) {
-        // console.error('Error destroying session:', err);
+        console.error('Error destroying session:', err);
         return res.status(500).json({
           status: 'error',
           message: 'Could not log out, please try again'
