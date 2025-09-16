@@ -1,16 +1,15 @@
-
 import CandidateCard from '@/components/election/CandidateCard';
 import apiClient from '../config';
 import { Vote } from 'lucide-react';
 
 export interface ElectionRequest {
-  id?: number,
+  id?: number;
   title: string;
   description: string;
   rules: string[];
   startDate: Date;
   endDate: Date;
-  status?: 'upcoming' | 'active' | 'completed' | 'cancelled';
+  status?: 'upcoming' | 'active' | 'completed' | 'cancelled' | 'draft';
   imageURL?: string;
   organization?: string;
   isPublic: boolean;
@@ -31,7 +30,6 @@ export interface CandidateRequest {
 }
 
 const electionService = {
-  
   createElection: async (electionData: ElectionRequest) => {
     try {
       //TODO: fix the date format here please
@@ -40,7 +38,6 @@ const electionService = {
       const response = await apiClient.post('/admin/election', electionData);
       return response.data;
     } catch (error) {
-
       if (error.response) {
         throw new Error(error.response.data.message || 'Failed to create election');
       } else if (error.request) {
@@ -75,7 +72,6 @@ const electionService = {
     return response.data;
   },
 
-
   getElection: async (id: number) => {
     const response = await apiClient.get(`/admin/election/${id}`);
     return response.data;
@@ -84,7 +80,7 @@ const electionService = {
   vote: async (electionId: number) => {
     const response = await apiClient.put(`/admin/election/vote/${electionId}`);
     return response.data;
-  }
+  },
 
   // updateElection: async (id: number, updates: Partial<ElectionRequest>) => {
   //   const response = await apiClient.patch<ElectionResponse>(`/admin/election/${id}`, updates);

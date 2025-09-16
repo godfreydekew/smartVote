@@ -10,19 +10,23 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@types/node": "^24.3.3",
     "cors": "^2.8.5",
-    "ethers": "^6.13.5",
     "express": "^4.21.2",
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.9",
+    "typescript": "^5.9.2"
   },
   "dependencies": {
+    "@thirdweb-dev/sdk": "^4.0.99",
     "axios": "^1.9.0",
     "bcrypt": "^5.1.1",
     "connect-redis": "^8.0.1",
     "didit-node-client": "^1.0.4",
     "dotenv": "^16.4.7",
+    "ethers": "^5.8.0",
     "express-session": "^1.18.1",
     "jsonwebtoken": "^9.0.2",
+    "node-cron": "^4.2.1",
     "nodemailer": "^7.0.6",
     "pg": "^8.13.3",
     "redis": "^4.7.0",

@@ -17,6 +17,7 @@ import { useSendTransaction } from 'thirdweb/react';
 import { prepareContractCall, getRpcClient, waitForReceipt } from 'thirdweb';
 import { electionFactoryContract, singleElectionContract } from '@/utils/thirdweb-client';
 import { ElectionCreationLoading } from './ElectionCreationLoading';
+import { determineElectionStatus } from '@/utils/determineElectionStatus';
 
 interface Candidate {
   id: string;
@@ -177,18 +178,20 @@ export const ElectionCreationForm = ({ onChange, initialData }: ElectionCreation
     let electionId;
     try {
       console.log(data.description);
+
+      const electionStatus = determineElectionStatus(data.startDate, data.endDate);
       const electionRequest: ElectionRequest = {
         title: data.title,
         description: data.description,
         rules: data.rules,
         startDate: data.startDate,
         endDate: data.endDate,
-        status: 'active',
+        status: electionStatus,
         imageURL: bannerImageUrl,
         organization: data.organization,
         isPublic: data.isPublic,
         accessControl: data.accessControl,
-        ownerAddress: 'ASDASDASDAS',
+        ownerAddress: import.meta.env.VITE_THIRDWEB_FACTORY_ADDRESS,
         ownerUserId: user.id,
       };
 
@@ -211,7 +214,7 @@ export const ElectionCreationForm = ({ onChange, initialData }: ElectionCreation
         setCurrentStep(3);
         setCreationStatus('ready');
 
-        //update election addresss here 
+        //update election addresss here
         toast({
           title: data.isDraft ? 'Draft Saved' : 'Election Published',
           description: `The election "${data.title}" has been ${data.isDraft ? 'saved as a draft' : 'published'}.`,

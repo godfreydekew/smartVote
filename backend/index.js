@@ -10,13 +10,16 @@ let { RedisStore } = require('connect-redis');
 const userRoutes = require('./routes/userRoutes.js');
 const electionRoutes = require('./routes/electionRoutes.js');
 const kycRoutes = require('./routes/kyc.js');
+const securityRoutes = require('./routes/securityRoutes.js');
 const { createTables } = require('./database/migrations/createTables.js');
+const { startElectionSecurityCron } = require('./cron/electionSecurity.js');
+const setupElectionStatusCron = require('./cron/electionStatus.js');
 
 const app = express();
 const server = createServer(app);
 const port = 3001;
 
-createTables()
+createTables();
 
 app.use(express.json());
 
@@ -75,10 +78,15 @@ app.use((req, res, next) => {
 app.use('/api/user', userRoutes);
 app.use('/api/admin', electionRoutes);
 app.use('/api/kyc', kycRoutes);
+app.use('/api/security', securityRoutes);
 
 app.get('/', (req, res) => {
   res.status(200).json({ message: 'Welcome to the voting system' });
 });
+
+// CRON JOBS
+// setupElectionStatusCron();
+startElectionSecurityCron();
 
 server.listen(port, '0.0.0.0', () => {
   console.log(`Backend + WebSocket server running at http://localhost:${port}`);

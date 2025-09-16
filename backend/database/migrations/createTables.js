@@ -73,7 +73,6 @@ async function createTables() {
         );
     `);
 
-
     await client.query(`
         CREATE TABLE IF NOT EXISTS user_created_elections (
             user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
@@ -114,6 +113,32 @@ async function createTables() {
         );
     `);
 
+    await client.query(`
+        CREATE TABLE IF NOT EXISTS security_audit_logs (
+            id SERIAL PRIMARY KEY,
+            election_id INTEGER REFERENCES elections(id) ON DELETE CASCADE,
+            check_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            db_total_votes INT,
+            chain_total_votes INT,
+            db_status TEXT,
+            chain_status TEXT,
+            discrepancy_found BOOLEAN DEFAULT FALSE,
+            details TEXT -- e.g. JSON payload describing mismatches
+        );
+    `);
+
+    await client.query(`
+        CREATE TABLE IF NOT EXISTS breaches (
+            id SERIAL PRIMARY KEY,
+            election_id INTEGER REFERENCES elections(id) ON DELETE CASCADE,
+            detected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            issue_type TEXT, -- e.g. "vote_mismatch", "status_mismatch", "tampering"
+            description TEXT,
+            resolved BOOLEAN DEFAULT FALSE,
+            resolved_at TIMESTAMP
+        );
+    `);
+
     await client.query('COMMIT');
     console.log('All tables created successfully.');
   } catch (error) {
@@ -128,5 +153,5 @@ async function createTables() {
 // createTables()
 
 module.exports = {
-  createTables
+  createTables,
 };
