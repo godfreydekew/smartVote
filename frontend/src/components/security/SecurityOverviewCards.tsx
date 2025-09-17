@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Database, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 import { getTimeAgo } from '@/utils/securityUtils';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Individual security metric card
@@ -25,35 +26,39 @@ const SecurityMetricCard = ({ title, value, subtitle, icon: Icon, borderColor, v
  * Main security overview cards grid
  */
 export const SecurityOverviewCards = ({ securityStats }) => {
+  const { t } = useTranslation();
+
   const cards = [
     {
-      title: 'Total Audits',
+      title: t('adminSecurity.overviewCards.totalAudits'),
       value: securityStats.totalAudits,
-      subtitle: `${securityStats.recentAudits} in last 24h`,
+      subtitle: `${securityStats.recentAudits} ${t('adminSecurity.overviewCards.inLast24h')}`,
       icon: Database,
       borderColor: 'border-l-blue-500',
       valueColor: 'text-blue-600',
     },
     {
-      title: 'Active Breaches',
+      title: t('adminSecurity.overviewCards.activeBreaches'),
       value: securityStats.activeBreaches,
-      subtitle: `${securityStats.criticalBreaches} critical`,
+      subtitle: `${securityStats.criticalBreaches} ${t('adminSecurity.overviewCards.critical')}`,
       icon: AlertTriangle,
       borderColor: 'border-l-red-500',
       valueColor: 'text-red-600',
     },
     {
-      title: 'Resolved',
+      title: t('adminSecurity.overviewCards.resolved'),
       value: securityStats.resolvedBreaches,
-      subtitle: 'Security incidents resolved',
+      subtitle: t('adminSecurity.overviewCards.securityIncidentsResolved'),
       icon: CheckCircle,
       borderColor: 'border-l-green-500',
       valueColor: 'text-green-600',
     },
     {
-      title: 'Last Audit',
-      value: securityStats.lastAuditTime ? getTimeAgo(securityStats.lastAuditTime) : 'Never',
-      subtitle: 'Automated monitoring',
+      title: t('adminSecurity.overviewCards.lastAudit'),
+      value: securityStats.lastAuditTime
+        ? getTimeAgo(securityStats.lastAuditTime)
+        : t('adminSecurity.overviewCards.never'),
+      subtitle: t('adminSecurity.overviewCards.automatedMonitoring'),
       icon: Clock,
       borderColor: 'border-l-yellow-500',
       valueColor: 'text-yellow-600',

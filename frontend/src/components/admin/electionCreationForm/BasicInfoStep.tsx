@@ -7,42 +7,57 @@ import ElectionDescriptionInput from '../../election/ElectionDescriptionInput';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DateTimePicker } from '../../election/DateTimePicker';
-import { Calendar as CalendarIcon, Globe, Lock, Plus, Trash, Upload, User, Users, AlertTriangle, Info } from 'lucide-react';
+import {
+  Calendar as CalendarIcon,
+  Globe,
+  Lock,
+  Plus,
+  Trash,
+  Upload,
+  User,
+  Users,
+  AlertTriangle,
+  Info,
+} from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { useEffect } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 // Define Zod schema for validation
-const basicInfoSchema = z.object({
-  title: z.string()
-    .min(5, 'Title must be at least 5 characters')
-    .max(100, 'Title cannot exceed 100 characters'),
-  description: z.string()
-    .min(20, 'Description must be at least 20 characters')
-    .max(1000, 'Description cannot exceed 1000 characters'),
-  rules: z.array(z.string())
-    .min(1, 'At least one rule is required')
-    .refine((rules) => rules.every(rule => rule.trim().length > 0), 'Rules cannot be empty')
-    .refine((rules) => rules.every(rule => rule.length <= 200), 'Rules cannot exceed 200 characters'),
-  organization: z.string()
-    .min(1, 'Organization is required'),
-  startDate: z.date()
-    .refine((date) => {
+const basicInfoSchema = z
+  .object({
+    title: z.string().min(5, 'Title must be at least 5 characters').max(100, 'Title cannot exceed 100 characters'),
+    description: z
+      .string()
+      .min(20, 'Description must be at least 20 characters')
+      .max(1000, 'Description cannot exceed 1000 characters'),
+    rules: z
+      .array(z.string())
+      .min(1, 'At least one rule is required')
+      .refine((rules) => rules.every((rule) => rule.trim().length > 0), 'Rules cannot be empty')
+      .refine((rules) => rules.every((rule) => rule.length <= 200), 'Rules cannot exceed 200 characters'),
+    organization: z.string().min(1, 'Organization is required'),
+    startDate: z.date().refine((date) => {
       const now = new Date();
       const minStartDate = new Date(now.getTime() + 2 * 60 * 1000); // 2 minutes from now
       return date >= minStartDate;
     }, 'Start time must be at least 2 minutes ahead'),
-  endDate: z.date(),
-  isPublic: z.boolean()
-}).refine((data) => {
-  return data.endDate > data.startDate;
-}, {
-  message: 'End time must be after start time',
-  path: ['endDate']
-});
+    endDate: z.date(),
+    isPublic: z.boolean(),
+  })
+  .refine(
+    (data) => {
+      return data.endDate > data.startDate;
+    },
+    {
+      message: 'End time must be after start time',
+      path: ['endDate'],
+    }
+  );
 
 interface BasicInfoStepProps {
   form: ReturnType<typeof useForm<ElectionFormData>>;
@@ -50,22 +65,20 @@ interface BasicInfoStepProps {
 }
 
 export const BasicInfoStep = ({ form, nextStep }: BasicInfoStepProps) => {
+  const { t } = useTranslation();
   const { toast } = useToast();
-  const { watch, trigger, formState: { errors } } = form;
+  const {
+    watch,
+    trigger,
+    formState: { errors },
+  } = form;
   const startDate = watch('startDate');
   const endDate = watch('endDate');
 
   // Validate form before allowing next step
   const handleNext = async () => {
-    const isValid = await trigger([
-      'title',
-      'description',
-      'rules',
-      'organization',
-      'startDate',
-      'endDate'
-    ]);
-    
+    const isValid = await trigger(['title', 'description', 'rules', 'organization', 'startDate', 'endDate']);
+
     if (isValid) {
       nextStep();
     } else {
@@ -88,14 +101,14 @@ export const BasicInfoStep = ({ form, nextStep }: BasicInfoStepProps) => {
     <div className="space-y-4">
       <Alert className="mb-4">
         <Info className="h-4 w-4" />
-        <AlertTitle>Important Information</AlertTitle>
+        <AlertTitle>{t('electionCreation.basicInfo.importantInfo.title')}</AlertTitle>
         <AlertDescription>
           <ul className="list-disc pl-4 mt-2 space-y-1">
-            <li>Election title must be between 5-100 characters</li>
-            <li>Description must be at least 20 characters long</li>
-            <li>At least one rule is required</li>
-            <li>Start time must be at least 2 minutes ahead of current time</li>
-            <li>End time must be after start time</li>
+            {t('electionCreation.basicInfo.importantInfo.requirements', { returnObjects: true }).map(
+              (requirement: string, index: number) => (
+                <li key={index}>{requirement}</li>
+              )
+            )}
           </ul>
         </AlertDescription>
       </Alert>
@@ -105,66 +118,66 @@ export const BasicInfoStep = ({ form, nextStep }: BasicInfoStepProps) => {
           control={form.control}
           name="title"
           rules={{
-            required: 'Election title is required',
+            required: t('electionCreation.basicInfo.fields.title.validation.required'),
             minLength: {
               value: 5,
-              message: 'Title must be at least 5 characters'
+              message: t('electionCreation.basicInfo.fields.title.validation.minLength'),
             },
             maxLength: {
               value: 100,
-              message: 'Title cannot exceed 100 characters'
-            }
+              message: t('electionCreation.basicInfo.fields.title.validation.maxLength'),
+            },
           }}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Election Title*</FormLabel>
+              <FormLabel>{t('electionCreation.basicInfo.fields.title.label')}</FormLabel>
               <FormControl>
-                <Input 
-                  placeholder="Enter election title" 
-                  {...field} 
+                <Input
+                  placeholder={t('electionCreation.basicInfo.fields.title.placeholder')}
+                  {...field}
                   className={form.formState.errors.title ? 'border-destructive' : ''}
                 />
               </FormControl>
-              <FormDescription>A clear title helps voters identify the election.</FormDescription>
+              <FormDescription>{t('electionCreation.basicInfo.fields.title.description')}</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <ElectionDescriptionInput 
-          control={form.control} 
-          name="description" 
+        <ElectionDescriptionInput
+          control={form.control}
+          name="description"
+          description={t('electionCreation.basicInfo.fields.description.description')}
+          placeholder={t('electionCreation.basicInfo.fields.description.placeholder')}
         />
 
         <ElectionRulesInput
           control={form.control}
           name="rules"
-          description="These rules will be displayed to voters before they cast their votes."
+          description={t('electionCreation.basicInfo.fields.rules.description')}
         />
 
         <FormField
           control={form.control}
           name="organization"
-          rules={{ required: 'Organization is required' }}
+          rules={{ required: t('electionCreation.basicInfo.fields.organization.validation.required') }}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Organization*</FormLabel>
+              <FormLabel>{t('electionCreation.basicInfo.fields.organization.label')}</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger className={form.formState.errors.organization ? 'border-destructive' : ''}>
-                    <SelectValue placeholder="Select an organization" />
+                    <SelectValue placeholder={t('electionCreation.basicInfo.fields.organization.placeholder')} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="Corporate/Business<">Corporate/Business</SelectItem>
-                  <SelectItem value="Non-Profit">Non-Profit</SelectItem>
-                  <SelectItem value="Educational Institution">Educational Institution</SelectItem>
-                  <SelectItem value="Union/Association">Union/Association</SelectItem>
-                  <SelectItem value="Community Organization">Community Organization</SelectItem>
-                  <SelectItem value="Government/Public Sector">Government/Public Sector</SelectItem>
-                  <SelectItem value="DAO/Blockchain Project">DAO/Blockchain Project</SelectItem>
-                  <SelectItem value="Cooperative">Cooperative</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
+                  {t('electionCreation.basicInfo.fields.organization.options', { returnObjects: true }).map(
+                    (option: string) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    )
+                  )}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -173,19 +186,19 @@ export const BasicInfoStep = ({ form, nextStep }: BasicInfoStepProps) => {
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <DateTimePicker 
+          <DateTimePicker
             control={form.control}
             name="startDate"
-            label="Start Date & Time*"
+            label={t('electionCreation.basicInfo.fields.dates.startDate')}
           />
-          
+
           <DateTimePicker
             control={form.control}
             name="endDate"
-            label="End Date & Time*"
+            label={t('electionCreation.basicInfo.fields.dates.endDate')}
             disabledDates={(date) => {
               const start = new Date(form.getValues('startDate'));
-              return date < new Date(start.setHours(0, 0, 0, 0)); 
+              return date < new Date(start.setHours(0, 0, 0, 0));
             }}
           />
         </div>
@@ -193,7 +206,7 @@ export const BasicInfoStep = ({ form, nextStep }: BasicInfoStepProps) => {
         {(form.formState.errors.startDate || form.formState.errors.endDate) && (
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Date Validation Error</AlertTitle>
+            <AlertTitle>{t('electionCreation.basicInfo.validation.dateError')}</AlertTitle>
             <AlertDescription>
               {form.formState.errors.startDate?.message || form.formState.errors.endDate?.message}
             </AlertDescription>
@@ -210,19 +223,19 @@ export const BasicInfoStep = ({ form, nextStep }: BasicInfoStepProps) => {
                   {field.value ? (
                     <div className="flex items-center">
                       <Globe className="w-4 h-4 mr-2" />
-                      Public Election
+                      {t('electionCreation.basicInfo.fields.visibility.public.title')}
                     </div>
                   ) : (
                     <div className="flex items-center">
                       <Lock className="w-4 h-4 mr-2" />
-                      Private Election
+                      {t('electionCreation.basicInfo.fields.visibility.private.title')}
                     </div>
                   )}
                 </FormLabel>
                 <FormDescription>
                   {field.value
-                    ? 'Anyone can participate (with optional restrictions)'
-                    : 'Only invited voters can participate (voter list required)'}
+                    ? t('electionCreation.basicInfo.fields.visibility.public.description')
+                    : t('electionCreation.basicInfo.fields.visibility.private.description')}
                 </FormDescription>
               </div>
               <FormControl>
@@ -234,11 +247,8 @@ export const BasicInfoStep = ({ form, nextStep }: BasicInfoStepProps) => {
 
         <div className="flex justify-between pt-4">
           <div />
-          <Button 
-            type="button" 
-            onClick={handleNext}
-          >
-            Next: Candidates
+          <Button type="button" onClick={handleNext}>
+            {t('electionCreation.basicInfo.buttons.next')}
           </Button>
         </div>
       </div>

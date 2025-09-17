@@ -16,19 +16,17 @@ interface AdvancedSettingsStepProps {
   setBannerImageUrl: (url: string) => void;
 }
 
-export const AdvancedSettingsStep = ({ 
-  form, 
+export const AdvancedSettingsStep = ({
+  form,
   prevStep,
   bannerImageUrl,
-  setBannerImageUrl
+  setBannerImageUrl,
 }: AdvancedSettingsStepProps) => {
   return (
     <div className="space-y-8">
       <div className="space-y-4">
         <h2 className="text-2xl font-bold tracking-tight">Advanced Settings</h2>
-        <p className="text-muted-foreground">
-          Customize the appearance and behavior of your election.
-        </p>
+        <p className="text-muted-foreground">Customize the appearance and behavior of your election.</p>
       </div>
 
       <Card className="border-2 hover:border-primary/50 transition-colors duration-200">
@@ -56,11 +54,7 @@ export const AdvancedSettingsStep = ({
               {bannerImageUrl ? (
                 <div className="space-y-4">
                   <div className="relative w-full h-64 overflow-hidden rounded-lg shadow-md">
-                    <img 
-                      src={bannerImageUrl} 
-                      alt="Banner Image" 
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={bannerImageUrl} alt="Banner Image" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-black/5 hover:bg-black/10 transition-colors duration-200" />
                   </div>
                   <div className="flex justify-center">
@@ -80,11 +74,7 @@ export const AdvancedSettingsStep = ({
                     <p className="text-sm font-medium text-gray-900">No banner image uploaded</p>
                     <p className="text-sm text-gray-500">Upload a banner image to customize your election page</p>
                   </div>
-                  <ImageUploader
-                    onUpload={setBannerImageUrl}
-                    buttonText="Upload Banner"
-                    className="w-full sm:w-auto"
-                  />
+                  <ImageUploader onUpload={setBannerImageUrl} buttonText="Upload Banner" className="w-full sm:w-auto" />
                 </div>
               )}
             </div>
@@ -92,7 +82,8 @@ export const AdvancedSettingsStep = ({
             <Alert className="bg-blue-50 border-blue-200">
               <AlertTriangle className="h-4 w-4 text-blue-600" />
               <AlertDescription className="text-sm text-gray-700">
-                The banner image will be displayed at the top of your election page. Choose an image that represents your election well.
+                The banner image will be displayed at the top of your election page. Choose an image that represents
+                your election well.
               </AlertDescription>
             </Alert>
           </div>
@@ -100,19 +91,11 @@ export const AdvancedSettingsStep = ({
       </Card>
 
       <div className="flex flex-col-reverse gap-4 pt-4 sm:flex-row sm:justify-between">
-        <Button 
-          type="button" 
-          variant="outline" 
-          onClick={prevStep}
-          className="w-full sm:w-auto"
-        >
+        <Button type="button" variant="outline" onClick={prevStep} className="w-full sm:w-auto">
           Back to Candidates
         </Button>
-        
-        <Button 
-          type="submit"
-          className="w-full sm:w-auto"
-        >
+
+        <Button type="submit" className="w-full sm:w-auto">
           Create Election
         </Button>
       </div>

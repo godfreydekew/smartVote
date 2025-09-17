@@ -3,14 +3,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Activity, AlertTriangle, CheckCircle } from 'lucide-react';
 import { SecurityStatusBadge } from '../security/SecurityBadges';
 import { getTimeAgo } from '@/utils/securityUtils';
+import { useTranslation } from 'react-i18next';
 
 export const SecurityRecentActivity = ({ auditLogs }) => {
+  const { t } = useTranslation();
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Activity size={18} />
-          Recent Security Activity
+          {t('adminSecurity.recentActivity.title')}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -24,11 +27,13 @@ export const SecurityRecentActivity = ({ auditLogs }) => {
                   <CheckCircle className="h-4 w-4 text-green-500" />
                 )}
                 <div>
-                  <p className="text-sm font-medium">Election {log.election_id}</p>
+                  <p className="text-sm font-medium">
+                    {t('adminSecurity.recentActivity.election', { id: log.election_id })}
+                  </p>
                   <p className="text-xs text-gray-500">{getTimeAgo(log.check_time)}</p>
                 </div>
               </div>
-              {SecurityStatusBadge(log.discrepancy_found)}
+              <SecurityStatusBadge hasDiscrepancy={log.discrepancy_found} />
             </div>
           ))}
         </div>

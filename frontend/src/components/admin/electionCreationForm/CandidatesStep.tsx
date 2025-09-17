@@ -31,7 +31,13 @@ interface CandidatesStepProps {
 
 export const CandidatesStep = ({ prevStep, nextStep }: CandidatesStepProps) => {
   const { toast } = useToast();
-  const { watch, setValue, formState: { errors }, trigger, control } = useFormContext<ElectionFormData>();
+  const {
+    watch,
+    setValue,
+    formState: { errors },
+    trigger,
+    control,
+  } = useFormContext<ElectionFormData>();
   const candidates = watch('candidates');
 
   const handleAddCandidate = () => {
@@ -98,27 +104,24 @@ export const CandidatesStep = ({ prevStep, nextStep }: CandidatesStepProps) => {
         {candidates.length === 0 && (
           <Alert variant="destructive" className="bg-red-50 border-red-200">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              You need to add at least one candidate to proceed.
-            </AlertDescription>
+            <AlertDescription>You need to add at least one candidate to proceed.</AlertDescription>
           </Alert>
         )}
       </div>
 
       <div className="space-y-6">
         {candidates.map((candidate, index) => (
-          <Card key={candidate.id} className="relative overflow-hidden border-2 hover:border-primary/50 transition-colors duration-200">
+          <Card
+            key={candidate.id}
+            className="relative overflow-hidden border-2 hover:border-primary/50 transition-colors duration-200"
+          >
             <CardHeader className="pb-0">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <Badge variant="secondary" className="text-sm font-medium px-3 py-1">
                     Candidate {index + 1}
                   </Badge>
-                  {candidate.name && (
-                    <span className="text-sm text-muted-foreground">
-                      {candidate.name}
-                    </span>
-                  )}
+                  {candidate.name && <span className="text-sm text-muted-foreground">{candidate.name}</span>}
                 </div>
                 <Button
                   type="button"
@@ -142,11 +145,7 @@ export const CandidatesStep = ({ prevStep, nextStep }: CandidatesStepProps) => {
                       {candidate.photo ? (
                         <>
                           <div className="relative w-32 h-32 rounded-full border-2 border-primary/20 overflow-hidden shadow-md">
-                            <img 
-                              src={candidate.photo} 
-                              alt="Candidate" 
-                              className="w-full h-full object-cover"
-                            />
+                            <img src={candidate.photo} alt="Candidate" className="w-full h-full object-cover" />
                           </div>
                           <ImageUploader
                             onUpload={(url) => updateCandidateField(index, 'photo', url)}
@@ -256,18 +255,16 @@ export const CandidatesStep = ({ prevStep, nextStep }: CandidatesStepProps) => {
                   <FormField
                     control={control}
                     name={`candidates.${index}.bio`}
-                    rules={{ 
+                    rules={{
                       required: 'Biography is required',
                       minLength: {
                         value: 20,
-                        message: 'Biography must be at least 20 characters'
-                      }
+                        message: 'Biography must be at least 20 characters',
+                      },
                     }}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="block text-sm font-medium text-muted-foreground">
-                          Biography
-                        </FormLabel>
+                        <FormLabel className="block text-sm font-medium text-muted-foreground">Biography</FormLabel>
                         <FormControl>
                           <Textarea
                             placeholder="Candidate's background and qualifications"
@@ -315,8 +312,8 @@ export const CandidatesStep = ({ prevStep, nextStep }: CandidatesStepProps) => {
                       rules={{
                         pattern: {
                           value: /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/,
-                          message: 'Must be a valid URL'
-                        }
+                          message: 'Must be a valid URL',
+                        },
                       }}
                       render={({ field }) => (
                         <FormItem>
@@ -348,31 +345,17 @@ export const CandidatesStep = ({ prevStep, nextStep }: CandidatesStepProps) => {
       </div>
 
       <div className="flex flex-col-reverse gap-4 pt-4 sm:flex-row sm:justify-between">
-        <Button 
-          type="button" 
-          variant="outline" 
-          onClick={prevStep}
-          className="w-full sm:w-auto"
-        >
+        <Button type="button" variant="outline" onClick={prevStep} className="w-full sm:w-auto">
           Back to Basic info
         </Button>
-        
+
         <div className="flex flex-col gap-4 sm:flex-row">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={handleAddCandidate}
-            className="w-full sm:w-auto"
-          >
+          <Button type="button" variant="secondary" onClick={handleAddCandidate} className="w-full sm:w-auto">
             <Plus className="h-4 w-4 mr-2" />
             Add Candidate
           </Button>
-          
-          <Button 
-            type="button" 
-            onClick={handleNext}
-            className="w-full sm:w-auto"
-          >
+
+          <Button type="button" onClick={handleNext} className="w-full sm:w-auto">
             Continue to Settings
           </Button>
         </div>

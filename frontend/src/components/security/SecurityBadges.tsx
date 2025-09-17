@@ -2,16 +2,19 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, CheckCircle, AlertCircle, XCircle } from 'lucide-react';
 import { getSeverityLevel } from '@/utils/securityUtils';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Status badge for audit logs (secure/breach)
  */
 export const SecurityStatusBadge = ({ hasDiscrepancy }) => {
+  const { t } = useTranslation();
+
   if (hasDiscrepancy) {
     return (
       <Badge variant="destructive" className="flex items-center gap-1">
         <AlertTriangle size={12} />
-        Breach Detected
+        {t('adminSecurity.badges.breachDetected')}
       </Badge>
     );
   }
@@ -19,7 +22,7 @@ export const SecurityStatusBadge = ({ hasDiscrepancy }) => {
   return (
     <Badge variant="success" className="flex items-center gap-1 bg-green-100 text-green-800">
       <CheckCircle size={12} />
-      Secure
+      {t('adminSecurity.badges.secure')}
     </Badge>
   );
 };
@@ -28,6 +31,7 @@ export const SecurityStatusBadge = ({ hasDiscrepancy }) => {
  * Severity badge for breach types
  */
 export const SeverityBadge = ({ issueType }) => {
+  const { t } = useTranslation();
   const severity = getSeverityLevel(issueType);
 
   const severityConfig: Record<
@@ -40,22 +44,22 @@ export const SeverityBadge = ({ issueType }) => {
   > = {
     critical: {
       variant: 'destructive',
-      label: 'Critical',
+      label: t('adminSecurity.badges.critical'),
       className: '',
     },
     high: {
       variant: 'warning',
-      label: 'High',
+      label: t('adminSecurity.badges.high'),
       className: 'bg-yellow-100 text-yellow-800',
     },
     medium: {
       variant: 'secondary',
-      label: 'Medium',
+      label: t('adminSecurity.badges.medium'),
       className: '',
     },
     low: {
       variant: 'outline',
-      label: 'Low',
+      label: t('adminSecurity.badges.low'),
       className: '',
     },
   };
@@ -73,11 +77,13 @@ export const SeverityBadge = ({ issueType }) => {
  * Resolution status badge for breaches
  */
 export const ResolutionStatusBadge = ({ resolved, resolvedAt }) => {
+  const { t } = useTranslation();
+
   if (resolved) {
     return (
       <Badge variant="success" className="bg-green-100 text-green-800">
         <CheckCircle size={12} className="mr-1" />
-        Resolved
+        {t('adminSecurity.badges.resolved')}
       </Badge>
     );
   }
@@ -85,7 +91,7 @@ export const ResolutionStatusBadge = ({ resolved, resolvedAt }) => {
   return (
     <Badge variant="destructive">
       <AlertCircle size={12} className="mr-1" />
-      Active
+      {t('adminSecurity.badges.active')}
     </Badge>
   );
 };
@@ -94,26 +100,28 @@ export const ResolutionStatusBadge = ({ resolved, resolvedAt }) => {
  * System health badge
  */
 export const SystemHealthBadge = ({ healthPercentage }) => {
+  const { t } = useTranslation();
+
   if (healthPercentage >= 90) {
     return (
       <Badge variant="success" className="bg-green-100 text-green-800">
-        Excellent
+        {t('adminSecurity.badges.excellent')}
       </Badge>
     );
   } else if (healthPercentage >= 70) {
     return (
       <Badge variant="warning" className="bg-yellow-100 text-yellow-800">
-        Good
+        {t('adminSecurity.badges.good')}
       </Badge>
     );
   } else if (healthPercentage >= 50) {
     return (
       <Badge variant="secondary" className="bg-orange-100 text-orange-800">
-        Fair
+        {t('adminSecurity.badges.fair')}
       </Badge>
     );
   } else {
-    return <Badge variant="destructive">Poor</Badge>;
+    return <Badge variant="destructive">{t('adminSecurity.badges.poor')}</Badge>;
   }
 };
 
@@ -121,10 +129,12 @@ export const SystemHealthBadge = ({ healthPercentage }) => {
  * Monitoring status badge
  */
 export const MonitoringStatusBadge = ({ isActive, lastCheck }) => {
+  const { t } = useTranslation();
+
   if (isActive) {
     return (
       <Badge variant="success" className="bg-green-100 text-green-800">
-        Active
+        {t('adminSecurity.badges.active')}
       </Badge>
     );
   }
@@ -132,7 +142,7 @@ export const MonitoringStatusBadge = ({ isActive, lastCheck }) => {
   return (
     <Badge variant="destructive">
       <XCircle size={12} className="mr-1" />
-      Inactive
+      {t('adminSecurity.badges.inactive')}
     </Badge>
   );
 };

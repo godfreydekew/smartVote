@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Calendar, Clock, AlertCircle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { useTranslation } from 'react-i18next';
 
 interface Election {
   id: string;
@@ -18,9 +19,12 @@ interface Election {
 
 interface ElectionsGridProps {
   elections: Election[];
+  status: 'active' | 'upcoming' | 'completed';
 }
 
 const EmptyState = ({ status }: { status: string }) => {
+  const { t } = useTranslation();
+
   const getIcon = () => {
     switch (status) {
       case 'active':
@@ -36,18 +40,18 @@ const EmptyState = ({ status }: { status: string }) => {
     switch (status) {
       case 'active':
         return {
-          title: "No Active Elections",
-          description: "There are currently no active elections. Check back later for new voting opportunities."
+          title: t('dashboard.noActiveElectionsTitle'),
+          description: t('dashboard.noActiveElectionsDescription'),
         };
       case 'upcoming':
         return {
-          title: "No Upcoming Elections",
-          description: "There are no upcoming elections scheduled. Stay tuned for future voting events."
+          title: t('dashboard.noUpcomingElectionsTitle'),
+          description: t('dashboard.noUpcomingElectionsDescription'),
         };
       default:
         return {
-          title: "No Completed Elections",
-          description: "There are no completed elections to display at this time."
+          title: t('dashboard.noCompletedElectionsTitle'),
+          description: t('dashboard.noCompletedElectionsDescription'),
         };
     }
   };
@@ -65,7 +69,7 @@ const EmptyState = ({ status }: { status: string }) => {
   );
 };
 
-const ElectionsGrid = memo(({ elections }: ElectionsGridProps) => {
+const ElectionsGrid = memo(({ elections, status }: ElectionsGridProps) => {
   const isMobile = useIsMobile();
   const [isLoading, setIsLoading] = React.useState(false);
 
@@ -74,20 +78,24 @@ const ElectionsGrid = memo(({ elections }: ElectionsGridProps) => {
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 1000);
-    
+
     return () => clearTimeout(timer);
   }, []);
 
   if (elections.length === 0) {
-    return <EmptyState status={elections[0]?.status || 'active'} />;
+    return <EmptyState status={elections[0]?.status || status} />;
   }
 
   // Show skeletons while loading
   if (isLoading) {
     return (
-      <div className={isMobile ? "flex gap-4 overflow-x-auto pb-4 px-4" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"}>
+      <div
+        className={
+          isMobile ? 'flex gap-4 overflow-x-auto pb-4 px-4' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
+        }
+      >
         {Array.from({ length: Math.min(6, elections.length) }).map((_, index) => (
-          <div key={index} className={isMobile ? "w-80 flex-shrink-0" : ""}>
+          <div key={index} className={isMobile ? 'w-80 flex-shrink-0' : ''}>
             <Card className="overflow-hidden">
               <Skeleton className="h-48 w-full" />
               <div className="p-4 space-y-3">

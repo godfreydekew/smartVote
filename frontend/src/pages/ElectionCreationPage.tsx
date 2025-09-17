@@ -3,8 +3,11 @@ import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { ElectionCreationForm } from '@/components/admin/electionCreationForm/ElectionCreationForm';
 import { BackNavigation } from '@/components/navigation/BackNavigation';
 import { Breadcrumbs } from '@/components/navigation/Breadcrumbs';
+import { useTranslation } from 'react-i18next';
 
 const ElectionCreationPage = () => {
+  const { t } = useTranslation();
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="flex h-screen overflow-hidden">
@@ -16,7 +19,7 @@ const ElectionCreationPage = () => {
                 {/* <Breadcrumbs className="mb-2" /> */}
                 <div className="flex items-center">
                   <BackNavigation to="/dashboard" className="mr-4" />
-                  <h3 className="text-2xl font-bold text-gray-800">Create New Election</h3>
+                  <h3 className="text-2xl font-bold text-gray-800">{t('electionCreation.title')}</h3>
                 </div>
               </div>
 

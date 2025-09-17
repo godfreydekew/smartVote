@@ -3,61 +3,52 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from '@/components/ui/use-toast';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from "zod";
+import { z } from 'zod';
 import { useForm, Controller } from 'react-hook-form';
 import { authService } from '@/api';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApi } from '@/hooks/use-api';
 import SignupNavbar from '@/components/SignupNavbar';
+import { useTranslation } from 'react-i18next';
 
 // Enhanced form schema with all required user fields
-const formSchema = z.object({
-  full_name: z.string().min(2, {
-    message: 'Name must be at least 2 characters'
-  }),
-  email: z.string().email({
-    message: 'Please enter a valid email address'
-  }),
-  password: z.string()
-  .min(8, { message: "Password must be at least 8 characters long" })
-  .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter" })
-  .regex(/[a-z]/, { message: "Password must contain at least one lowercase letter" })
-  .regex(/[0-9]/, { message: "Password must contain at least one number" })
-  .regex(/[^A-Za-z0-9]/, { message: "Password must contain at least one special character" }),
-  age: z.string()
-    .refine(val => !isNaN(parseInt(val)), {
-      message: 'Age must be a number'
-    })
-    .refine(val => parseInt(val) >= 18, {
-      message: 'You must be at least 18 years old'
+const createFormSchema = (t: any) =>
+  z.object({
+    full_name: z.string().min(2, {
+      message: t('forms.auth.signup.errors.nameRequired'),
     }),
-  gender: z.string().min(1, {
-    message: 'Please select your gender'
-  }),
-  countryOfResidence: z.string().min(1, {
-    message: 'Please select your country of residence'
-  })
-});
+    email: z.string().email({
+      message: t('forms.auth.signup.errors.emailRequired'),
+    }),
+    password: z
+      .string()
+      .min(8, { message: t('forms.auth.signup.errors.passwordRequired') })
+      .regex(/[A-Z]/, { message: t('forms.auth.signup.errors.passwordUppercase') })
+      .regex(/[a-z]/, { message: t('forms.auth.signup.errors.passwordLowercase') })
+      .regex(/[0-9]/, { message: t('forms.auth.signup.errors.passwordNumber') })
+      .regex(/[^A-Za-z0-9]/, { message: t('forms.auth.signup.errors.passwordSpecial') }),
+    age: z
+      .string()
+      .refine((val) => !isNaN(parseInt(val)), {
+        message: t('forms.auth.signup.errors.ageRequired'),
+      })
+      .refine((val) => parseInt(val) >= 18, {
+        message: t('forms.auth.signup.errors.ageMinimum'),
+      }),
+    gender: z.string().min(1, {
+      message: t('forms.auth.signup.errors.genderRequired'),
+    }),
+    countryOfResidence: z.string().min(1, {
+      message: t('forms.auth.signup.errors.countryRequired'),
+    }),
+  });
 
-type SignupFormData = z.infer<typeof formSchema>;
+type SignupFormData = z.infer<ReturnType<typeof createFormSchema>>;
 
 interface SignupError {
   response?: {
@@ -75,21 +66,20 @@ interface SignupError {
 }
 
 const Signup = () => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const {
-    data: signupResponse,
-    isLoading,
-    error,
-    execute: signupUser
-  } = useApi(authService.createAccount);
-  
+
+  const formSchema = createFormSchema(t);
+
+  const { data: signupResponse, isLoading, error, execute: signupUser } = useApi(authService.createAccount);
+
   const {
     register,
     handleSubmit,
     control,
-    formState: { errors, isSubmitting }
+    formState: { errors, isSubmitting },
   } = useForm<SignupFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -98,8 +88,8 @@ const Signup = () => {
       password: '',
       age: '',
       gender: '',
-      countryOfResidence: ''
-    }
+      countryOfResidence: '',
+    },
   });
 
   const onSubmit = async (data: SignupFormData) => {
@@ -108,63 +98,53 @@ const Signup = () => {
         ...data,
         age: parseInt(data.age),
       };
-  
+
       await signupUser(userData);
-  
+
       toast({
-        title: "Account created successfully",
-        description: "You can now log in with your credentials.",
-        variant: "success",
+        title: t('forms.auth.signup.successTitle'),
+        description: t('forms.auth.signup.successDescription'),
+        variant: 'success',
       });
-  
+
       navigate('/login');
     } catch (error: unknown) {
       const signupError = error as SignupError;
-      let errorMessage = "An unexpected error occurred. Please try again.";
-  
+      let errorMessage = t('forms.auth.signup.errors.unexpectedError');
+
       if (signupError.response) {
         if (signupError.response.data?.message) {
           errorMessage = signupError.response.data.message;
         } else if (signupError.response.status === 409) {
-          errorMessage = "Email already exists. Please use a different email.";
+          errorMessage = t('forms.auth.signup.errors.emailExists');
         } else if (signupError.response.status === 400) {
-          errorMessage = "Invalid information provided. Please check your details.";
+          errorMessage = t('forms.auth.signup.errors.invalidInfo');
         }
       } else if (signupError.request) {
-        errorMessage = "Unable to connect to the server. Please check your internet connection.";
+        errorMessage = t('forms.auth.signup.errors.connectionError');
       } else if (signupError.message) {
         errorMessage = signupError.message;
       }
-  
+
       toast({
-        title: "Signup failed",
+        title: t('forms.auth.signup.errorTitle'),
         description: errorMessage,
-        variant: "destructive",
+        variant: 'destructive',
       });
     }
   };
 
-  // List of common countries
-  const countries = [
-    'United States', 'Canada', 'United Kingdom', 'Australia', 'Germany', 
-    'France', 'Spain', 'Italy', 'Japan', 'China', 'India', 'Brazil', 
-    'Mexico', 'South Africa', 'Nigeria', 'Kenya', 'Egypt', 'Saudi Arabia',
-    'United Arab Emirates', 'Other'
-  ];
-
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-gray-50 to-white">
       <SignupNavbar />
-      
+
       <div className="flex-1 flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
         <Card className="w-full max-w-md shadow-[0_0_30px_rgba(0,0,0,0.1)] hover:shadow-[0_0_40px_rgba(0,0,0,0.15)] transition-all duration-300">
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-4xl font-bold bg-gradient-to-r from-vote-blue to-vote-teal bg-clip-text text-transparent">
-              Create an account
+              {t('forms.auth.signup.title')}
             </CardTitle>
-            <CardDescription className="text-lg text-gray-600">
-              Start your voting journey today
-            </CardDescription>
+            <CardDescription className="text-lg text-gray-600">{t('forms.auth.signup.subtitle')}</CardDescription>
           </CardHeader>
 
           <CardContent>
@@ -172,43 +152,45 @@ const Signup = () => {
               <div className="grid grid-cols-1 gap-4">
                 {/* Full Name Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-gray-700 font-medium">Full Name *</Label>
+                  <Label htmlFor="name" className="text-gray-700 font-medium">
+                    {t('forms.auth.signup.fullName')} *
+                  </Label>
                   <Input
                     id="name"
-                    placeholder="Enter your full name"
+                    placeholder={t('forms.auth.signup.fullNamePlaceholder')}
                     className="h-12 rounded-xl border-gray-200 focus:border-vote-blue focus:ring-vote-blue/20 transition-all"
                     {...register('full_name')}
                     disabled={isLoading}
                   />
-                  {errors.full_name && (
-                    <p className="text-red-500 text-sm">{errors.full_name.message}</p>
-                  )}
+                  {errors.full_name && <p className="text-red-500 text-sm">{errors.full_name.message}</p>}
                 </div>
 
                 {/* Email Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-gray-700 font-medium">Email *</Label>
+                  <Label htmlFor="email" className="text-gray-700 font-medium">
+                    {t('forms.auth.signup.email')} *
+                  </Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="Enter your email"
+                    placeholder={t('forms.auth.signup.emailPlaceholder')}
                     className="h-12 rounded-xl border-gray-200 focus:border-vote-blue focus:ring-vote-blue/20 transition-all"
                     {...register('email')}
                     disabled={isLoading}
                   />
-                  {errors.email && (
-                    <p className="text-red-500 text-sm">{errors.email.message}</p>
-                  )}
+                  {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
                 </div>
 
                 {/* Password Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-gray-700 font-medium">Password *</Label>
+                  <Label htmlFor="password" className="text-gray-700 font-medium">
+                    {t('forms.auth.signup.password')} *
+                  </Label>
                   <div className="relative">
                     <Input
                       id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Create a password"
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder={t('forms.auth.signup.passwordPlaceholder')}
                       className="h-12 rounded-xl border-gray-200 focus:border-vote-blue focus:ring-vote-blue/20 transition-all pr-12"
                       {...register('password')}
                       disabled={isLoading}
@@ -221,73 +203,64 @@ const Signup = () => {
                       {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
                   </div>
-                  {errors.password && (
-                    <p className="text-red-500 text-sm">{errors.password.message}</p>
-                  )}
+                  {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
                 </div>
 
                 {/* Age Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="age" className="text-gray-700 font-medium">Age *</Label>
+                  <Label htmlFor="age" className="text-gray-700 font-medium">
+                    {t('forms.auth.signup.age')} *
+                  </Label>
                   <Input
                     id="age"
                     type="number"
-                    placeholder="Enter your age"
+                    placeholder={t('forms.auth.signup.agePlaceholder')}
                     className="h-12 rounded-xl border-gray-200 focus:border-vote-blue focus:ring-vote-blue/20 transition-all"
                     {...register('age')}
                     disabled={isLoading}
                   />
-                  {errors.age && (
-                    <p className="text-red-500 text-sm">{errors.age.message}</p>
-                  )}
+                  {errors.age && <p className="text-red-500 text-sm">{errors.age.message}</p>}
                 </div>
 
                 {/* Gender Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="gender" className="text-gray-700 font-medium">Gender *</Label>
+                  <Label htmlFor="gender" className="text-gray-700 font-medium">
+                    {t('forms.auth.signup.gender')} *
+                  </Label>
                   <Controller
                     name="gender"
                     control={control}
                     render={({ field }) => (
-                      <Select
-                        disabled={isLoading}
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
+                      <Select disabled={isLoading} onValueChange={field.onChange} value={field.value}>
                         <SelectTrigger className="h-12 rounded-xl border-gray-200 focus:border-vote-blue focus:ring-vote-blue/20 transition-all">
-                          <SelectValue placeholder="Select your gender" />
+                          <SelectValue placeholder={t('forms.auth.signup.genderPlaceholder')} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="male">Male</SelectItem>
-                          <SelectItem value="female">Female</SelectItem>
-                
+                          <SelectItem value="male">{t('forms.gender.male')}</SelectItem>
+                          <SelectItem value="female">{t('forms.gender.female')}</SelectItem>
                         </SelectContent>
                       </Select>
                     )}
                   />
-                  {errors.gender && (
-                    <p className="text-red-500 text-sm">{errors.gender.message}</p>
-                  )}
+                  {errors.gender && <p className="text-red-500 text-sm">{errors.gender.message}</p>}
                 </div>
 
                 {/* Country Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="countryOfResidence" className="text-gray-700 font-medium">Country of Residence *</Label>
+                  <Label htmlFor="countryOfResidence" className="text-gray-700 font-medium">
+                    {t('forms.auth.signup.country')} *
+                  </Label>
                   <Controller
                     name="countryOfResidence"
                     control={control}
                     render={({ field }) => (
-                      <Select
-                        disabled={isLoading}
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
+                      <Select disabled={isLoading} onValueChange={field.onChange} value={field.value}>
                         <SelectTrigger className="h-12 rounded-xl border-gray-200 focus:border-vote-blue focus:ring-vote-blue/20 transition-all">
-                          <SelectValue placeholder="Select your country" />
+                          <SelectValue placeholder={t('forms.auth.signup.countryPlaceholder')} />
                         </SelectTrigger>
                         <SelectContent>
-                          {countries.map((country) => (
-                            <SelectItem key={country} value={country.toLowerCase()}>
+                          {t('forms.countries', { returnObjects: true }).map((country: string, index: number) => (
+                            <SelectItem key={index} value={country.toLowerCase()}>
                               {country}
                             </SelectItem>
                           ))}
@@ -301,24 +274,24 @@ const Signup = () => {
                 </div>
               </div>
 
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full h-12 mt-6 rounded-xl bg-gradient-to-r from-vote-blue to-vote-teal hover:opacity-90 transition-all text-white font-medium shadow-lg hover:shadow-xl"
                 disabled={isLoading}
               >
-                {isLoading ? "Creating account..." : "Sign up"}
+                {isLoading ? t('forms.auth.signup.submitButtonLoading') : t('forms.auth.signup.submitButton')}
               </Button>
             </form>
           </CardContent>
 
           <CardFooter className="flex justify-center">
             <p className="text-center text-gray-600">
-              Already have an account?{' '}
-              <Link 
-                to="/login" 
+              {t('forms.auth.signup.loginLink')}{' '}
+              <Link
+                to="/login"
                 className="font-semibold text-vote-blue hover:text-vote-teal transition-colors underline-offset-4 hover:underline"
               >
-                Sign in
+                {t('forms.auth.signup.loginLinkText')}
               </Link>
             </p>
           </CardFooter>

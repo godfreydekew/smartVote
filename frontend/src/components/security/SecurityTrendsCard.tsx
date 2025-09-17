@@ -2,20 +2,23 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export const SecurityTrendsCard = ({ securityStats }) => {
+  const { t } = useTranslation();
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TrendingUp size={18} />
-          Security Trends
+          {t('adminSecurity.trendsCard.title')}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">System Health</span>
+            <span className="text-sm text-gray-600">{t('adminSecurity.trendsCard.systemHealth')}</span>
             <div className="flex items-center gap-2">
               <div className="w-16 bg-gray-200 rounded-full h-2">
                 <div
@@ -30,16 +33,18 @@ export const SecurityTrendsCard = ({ securityStats }) => {
           </div>
 
           <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">Data Integrity</span>
+            <span className="text-sm text-gray-600">{t('adminSecurity.trendsCard.dataIntegrity')}</span>
             <Badge variant={securityStats.activeBreaches === 0 ? 'success' : 'destructive'}>
-              {securityStats.activeBreaches === 0 ? 'Intact' : 'Compromised'}
+              {securityStats.activeBreaches === 0
+                ? t('adminSecurity.trendsCard.intact')
+                : t('adminSecurity.trendsCard.compromised')}
             </Badge>
           </div>
 
           <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">Monitoring Status</span>
+            <span className="text-sm text-gray-600">{t('adminSecurity.trendsCard.monitoringStatus')}</span>
             <Badge variant="success" className="bg-green-100 text-green-800">
-              Active
+              {t('adminSecurity.trendsCard.active')}
             </Badge>
           </div>
         </div>

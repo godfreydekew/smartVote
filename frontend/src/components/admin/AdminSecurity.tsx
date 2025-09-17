@@ -11,8 +11,10 @@ import { SecurityAlertBanner } from '../security/SecurityAlertBanner';
 import { SecuritySearchHeader } from '../security/SecuritySearchHeader';
 import { SecurityRecentActivity } from '../security/SecurityRecentActivity';
 import { SecurityTrendsCard } from '../security/SecurityTrendsCard';
+import { useTranslation } from 'react-i18next';
 
 export const AdminSecurity = () => {
+  const { t } = useTranslation();
   const [auditLogs, setAuditLogs] = useState([]);
   const [breaches, setBreaches] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -144,11 +146,11 @@ export const AdminSecurity = () => {
           {/* Basic Info */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <h4 className="font-semibold text-sm text-gray-700">Election ID</h4>
+              <h4 className="font-semibold text-sm text-gray-700">{t('adminSecurity.electionId')}</h4>
               <p className="text-lg font-medium">Election {log.election_id}</p>
             </div>
             <div>
-              <h4 className="font-semibold text-sm text-gray-700">Check Time</h4>
+              <h4 className="font-semibold text-sm text-gray-700">{t('adminSecurity.checkTime')}</h4>
               <p>{new Date(log.check_time).toLocaleString()}</p>
             </div>
           </div>
@@ -157,11 +159,11 @@ export const AdminSecurity = () => {
           {(log.db_total_votes !== null || log.chain_total_votes !== null) && (
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <h4 className="font-semibold text-sm text-gray-700">Database Votes</h4>
+                <h4 className="font-semibold text-sm text-gray-700">{t('adminSecurity.databaseVotes')}</h4>
                 <p className="text-xl font-medium">{log.db_total_votes ?? 'N/A'}</p>
               </div>
               <div>
-                <h4 className="font-semibold text-sm text-gray-700">Blockchain Votes</h4>
+                <h4 className="font-semibold text-sm text-gray-700">{t('adminSecurity.blockchainVotes')}</h4>
                 <p
                   className={`text-xl font-medium ${log.db_total_votes !== log.chain_total_votes ? 'text-red-600' : ''}`}
                 >
@@ -175,11 +177,11 @@ export const AdminSecurity = () => {
           {(log.db_status || log.chain_status) && (
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <h4 className="font-semibold text-sm text-gray-700">Database Status</h4>
+                <h4 className="font-semibold text-sm text-gray-700">{t('adminSecurity.databaseStatus')}</h4>
                 <Badge variant="secondary">{log.db_status || 'N/A'}</Badge>
               </div>
               <div>
-                <h4 className="font-semibold text-sm text-gray-700">Blockchain Status</h4>
+                <h4 className="font-semibold text-sm text-gray-700">{t('adminSecurity.blockchainStatus')}</h4>
                 <Badge variant={log.db_status !== log.chain_status ? 'destructive' : 'secondary'}>
                   {log.chain_status || 'N/A'}
                 </Badge>
@@ -190,10 +192,13 @@ export const AdminSecurity = () => {
           {/* Discrepancy Alert */}
           {log.discrepancy_found && (
             <div className="p-4 bg-red-50 rounded-lg border border-red-200">
-              <h4 className="font-semibold text-red-800 flex items-center gap-2">⚠️ Security Issues Detected</h4>
+              <h4 className="font-semibold text-red-800 flex items-center gap-2">
+                {t('adminSecurity.securityIssuesDetected')}
+              </h4>
               <p className="text-red-700 text-sm mt-1">
-                This audit found {parsedDetails?.summary?.failedChecks || 'multiple'} security issues requiring
-                attention.
+                {t('adminSecurity.securityIssuesDescription', {
+                  count: parsedDetails?.summary?.failedChecks || 'multiple',
+                })}
               </p>
             </div>
           )}
@@ -201,22 +206,22 @@ export const AdminSecurity = () => {
           {/* Audit Summary */}
           {parsedDetails?.summary && (
             <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-semibold text-gray-800 mb-3">Audit Summary</h4>
+              <h4 className="font-semibold text-gray-800 mb-3">{t('adminSecurity.auditSummary')}</h4>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                 <div>
-                  <span className="text-gray-600">Total Checks</span>
+                  <span className="text-gray-600">{t('adminSecurity.totalChecks')}</span>
                   <p className="font-medium">{parsedDetails.summary.totalChecks}</p>
                 </div>
                 <div>
-                  <span className="text-gray-600">Passed</span>
+                  <span className="text-gray-600">{t('adminSecurity.passed')}</span>
                   <p className="font-medium text-green-600">{parsedDetails.summary.passedChecks}</p>
                 </div>
                 <div>
-                  <span className="text-gray-600">Failed</span>
+                  <span className="text-gray-600">{t('adminSecurity.failed')}</span>
                   <p className="font-medium text-red-600">{parsedDetails.summary.failedChecks}</p>
                 </div>
                 <div>
-                  <span className="text-gray-600">Pass Rate</span>
+                  <span className="text-gray-600">{t('adminSecurity.passRate')}</span>
                   <p className="font-medium">{Math.round(parsedDetails.summary.passRate)}%</p>
                 </div>
               </div>
@@ -226,7 +231,7 @@ export const AdminSecurity = () => {
           {/* Security Violations */}
           {parsedDetails?.violations && parsedDetails.violations.length > 0 && (
             <div>
-              <h4 className="font-semibold text-gray-800 mb-3">Security Violations</h4>
+              <h4 className="font-semibold text-gray-800 mb-3">{t('adminSecurity.securityViolations')}</h4>
               <div className="space-y-3">
                 {parsedDetails.violations.map((violation, index) => (
                   <div key={index} className="border border-red-200 rounded-lg p-3 bg-red-50">
@@ -250,7 +255,7 @@ export const AdminSecurity = () => {
           {/* Raw Details Fallback */}
           {log.details && !parsedDetails && (
             <div>
-              <h4 className="font-semibold text-sm text-gray-700">Raw Details</h4>
+              <h4 className="font-semibold text-sm text-gray-700">{t('adminSecurity.rawDetails')}</h4>
               <div className="text-xs text-gray-600 bg-gray-100 p-3 rounded font-mono whitespace-pre-wrap max-h-40 overflow-y-auto">
                 {log.details}
               </div>
@@ -269,18 +274,18 @@ export const AdminSecurity = () => {
           {/* Basic Info */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <h4 className="font-semibold text-sm text-gray-700">Election ID</h4>
+              <h4 className="font-semibold text-sm text-gray-700">{t('adminSecurity.electionId')}</h4>
               <p className="text-lg font-medium">Election {breach.election_id}</p>
             </div>
             <div>
-              <h4 className="font-semibold text-sm text-gray-700">Detected At</h4>
+              <h4 className="font-semibold text-sm text-gray-700">{t('adminSecurity.detectedAt')}</h4>
               <p>{new Date(breach.detected_at).toLocaleString()}</p>
             </div>
           </div>
 
           {/* Issue Types */}
           <div>
-            <h4 className="font-semibold text-sm text-gray-700 mb-2">Issue Types</h4>
+            <h4 className="font-semibold text-sm text-gray-700 mb-2">{t('adminSecurity.issueTypes')}</h4>
             <div className="flex flex-wrap gap-2">
               {issueTypes.map((type, index) => (
                 <Badge key={index} variant="destructive" className="text-xs">
@@ -292,18 +297,20 @@ export const AdminSecurity = () => {
 
           {/* Status */}
           <div>
-            <h4 className="font-semibold text-sm text-gray-700">Status</h4>
+            <h4 className="font-semibold text-sm text-gray-700">{t('adminSecurity.status')}</h4>
             <Badge variant={breach.resolved ? 'default' : 'destructive'} className="mt-1">
-              {breach.resolved ? 'Resolved' : 'Active'}
+              {breach.resolved ? t('adminSecurity.resolved') : t('adminSecurity.active')}
             </Badge>
             {breach.resolved && breach.resolved_at && (
-              <p className="text-sm text-gray-600 mt-1">Resolved: {new Date(breach.resolved_at).toLocaleString()}</p>
+              <p className="text-sm text-gray-600 mt-1">
+                {t('adminSecurity.resolvedAt', { date: new Date(breach.resolved_at).toLocaleString() })}
+              </p>
             )}
           </div>
 
           {/* Description - Parse individual issues */}
           <div>
-            <h4 className="font-semibold text-sm text-gray-700 mb-2">Issue Details</h4>
+            <h4 className="font-semibold text-sm text-gray-700 mb-2">{t('adminSecurity.issueDetails')}</h4>
             <div className="space-y-3">
               {breach.description.split('; ').map((issue, index) => {
                 const [issueType, ...messageParts] = issue.split(': ');
@@ -383,7 +390,9 @@ export const AdminSecurity = () => {
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {selectedItem?.type === 'audit' ? 'Audit Log Details' : 'Security Breach Details'}
+              {selectedItem?.type === 'audit'
+                ? t('adminSecurity.auditLogDetails')
+                : t('adminSecurity.securityBreachDetails')}
             </DialogTitle>
           </DialogHeader>
           {renderDetailsContent()}

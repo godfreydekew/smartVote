@@ -1,30 +1,43 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Users, CheckCircle2, Clock, TrendingUp, AlertCircle } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
-import { useReadContract } from "thirdweb/react";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Calendar, Users, CheckCircle2, Clock, TrendingUp, AlertCircle } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { useReadContract } from 'thirdweb/react';
 import { singleElectionContract, electionFactoryContract } from '@/utils/thirdweb-client';
 import { useAuth } from '@/auth/AuthProvider';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { motion } from "framer-motion";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Legend,
+  Tooltip,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from 'recharts';
+import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 // Map frontend states to contract states
 const stateMapping = {
-  'upcoming': 0, // UPCOMING
-  'active': 1,   // ACTIVE
-  'completed': 2 // COMPLETED
+  upcoming: 0, // UPCOMING
+  active: 1, // ACTIVE
+  completed: 2, // COMPLETED
 };
 
 const COLORS = {
-  active: 'rgba(0, 136, 254, 0.9)',    // Blue
-  upcoming: 'rgba(0, 196, 159, 0.9)',  // Teal
-  completed: 'rgba(136, 132, 216, 0.9)' // Purple
+  active: 'rgba(0, 136, 254, 0.9)', // Blue
+  upcoming: 'rgba(0, 196, 159, 0.9)', // Teal
+  completed: 'rgba(136, 132, 216, 0.9)', // Purple
 };
 
 const HOVER_COLORS = {
-  active: 'rgba(0, 136, 254, 1)',    // Blue
-  upcoming: 'rgba(0, 196, 159, 1)',  // Teal
-  completed: 'rgba(136, 132, 216, 1)' // Purple
+  active: 'rgba(0, 136, 254, 1)', // Blue
+  upcoming: 'rgba(0, 196, 159, 1)', // Teal
+  completed: 'rgba(136, 132, 216, 1)', // Purple
 };
 
 interface ElectionData {
@@ -39,37 +52,42 @@ interface ElectionData {
 
 export const AdminOverview = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   // Get all elections by owner
   const { data: ownerElections, isPending: isOwnerPending } = useReadContract({
     contract: electionFactoryContract,
-    method: "function getElectionsByOwner(address owner) view returns ((address electionAddress, uint256 id, string title, uint256 startTime, uint256 endTime, bool isPublic, address owner)[])",
+    method:
+      'function getElectionsByOwner(address owner) view returns ((address electionAddress, uint256 id, string title, uint256 startTime, uint256 endTime, bool isPublic, address owner)[])',
     params: [user?.address],
   });
 
   // Get elections by state
   const { data: activeElections, isPending: isActivePending } = useReadContract({
     contract: electionFactoryContract,
-    method: "function getElectionsByState(uint8 _state) view returns ((address electionAddress, uint256 id, string title, uint256 startTime, uint256 endTime, bool isPublic, address owner)[])",
+    method:
+      'function getElectionsByState(uint8 _state) view returns ((address electionAddress, uint256 id, string title, uint256 startTime, uint256 endTime, bool isPublic, address owner)[])',
     params: [stateMapping['active']],
   });
 
   const { data: upcomingElections, isPending: isUpcomingPending } = useReadContract({
     contract: electionFactoryContract,
-    method: "function getElectionsByState(uint8 _state) view returns ((address electionAddress, uint256 id, string title, uint256 startTime, uint256 endTime, bool isPublic, address owner)[])",
+    method:
+      'function getElectionsByState(uint8 _state) view returns ((address electionAddress, uint256 id, string title, uint256 startTime, uint256 endTime, bool isPublic, address owner)[])',
     params: [stateMapping['upcoming']],
   });
 
   const { data: completedElections, isPending: isCompletedPending } = useReadContract({
     contract: electionFactoryContract,
-    method: "function getElectionsByState(uint8 _state) view returns ((address electionAddress, uint256 id, string title, uint256 startTime, uint256 endTime, bool isPublic, address owner)[])",
+    method:
+      'function getElectionsByState(uint8 _state) view returns ((address electionAddress, uint256 id, string title, uint256 startTime, uint256 endTime, bool isPublic, address owner)[])',
     params: [stateMapping['completed']],
   });
 
   // Filter elections by owner address
   const filterElectionsByOwner = (elections: readonly ElectionData[] | undefined) => {
     if (!elections || !user?.address) return [];
-    return elections.filter(election => election.owner.toLowerCase() === user.address.toLowerCase());
+    return elections.filter((election) => election.owner.toLowerCase() === user.address.toLowerCase());
   };
 
   // Apply filters to get admin's elections
@@ -81,13 +99,13 @@ export const AdminOverview = () => {
   const activeElectionsCount = adminActiveElections.length;
   const upcomingElectionsCount = adminUpcomingElections.length;
   const completedElectionsCount = adminCompletedElections.length;
-  const totalElections = (ownerElections?.length || 0);
+  const totalElections = ownerElections?.length || 0;
 
   // Calculate percentage distribution
   const distributionData = [
-    { name: 'Active', value: activeElectionsCount },
-    { name: 'Upcoming', value: upcomingElectionsCount },
-    { name: 'Completed', value: completedElectionsCount },
+    { name: t('adminOverview.activeElections'), value: activeElectionsCount },
+    { name: t('adminOverview.upcomingElections'), value: upcomingElectionsCount },
+    { name: t('adminOverview.completedElections'), value: completedElectionsCount },
   ];
 
   // Calculate average election duration
@@ -124,7 +142,7 @@ export const AdminOverview = () => {
     if (!elections) return [];
     const now = Math.floor(Date.now() / 1000);
     const oneDay = 24 * 60 * 60;
-    return elections.filter(election => {
+    return elections.filter((election) => {
       const startTime = Number(election.startTime);
       return startTime > now && startTime <= now + oneDay;
     });
@@ -135,7 +153,7 @@ export const AdminOverview = () => {
     if (!elections) return [];
     const now = Math.floor(Date.now() / 1000);
     const oneDay = 24 * 60 * 60;
-    return elections.filter(election => {
+    return elections.filter((election) => {
       const endTime = Number(election.endTime);
       return endTime < now && endTime >= now - oneDay;
     });
@@ -163,13 +181,13 @@ export const AdminOverview = () => {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-500 flex items-center gap-2">
               <Clock className="h-4 w-4 text-blue-500" />
-              Active Elections
+              {t('adminOverview.activeElections')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
               <div className="text-3xl font-bold text-blue-600">{activeElectionsCount}</div>
-              <div className="text-sm text-gray-500">Currently Running</div>
+              <div className="text-sm text-gray-500">{t('adminOverview.currentlyRunning')}</div>
             </div>
           </CardContent>
         </Card>
@@ -178,13 +196,13 @@ export const AdminOverview = () => {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-500 flex items-center gap-2">
               <Calendar className="h-4 w-4 text-teal-500" />
-              Upcoming Elections
+              {t('adminOverview.upcomingElections')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
               <div className="text-3xl font-bold text-teal-600">{upcomingElectionsCount}</div>
-              <div className="text-sm text-gray-500">Scheduled</div>
+              <div className="text-sm text-gray-500">{t('adminOverview.scheduled')}</div>
             </div>
           </CardContent>
         </Card>
@@ -193,13 +211,13 @@ export const AdminOverview = () => {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-500 flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-purple-500" />
-              Completed Elections
+              {t('adminOverview.completedElections')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
               <div className="text-3xl font-bold text-purple-600">{completedElectionsCount}</div>
-              <div className="text-sm text-gray-500">Finished</div>
+              <div className="text-sm text-gray-500">{t('adminOverview.finished')}</div>
             </div>
           </CardContent>
         </Card>
@@ -208,13 +226,13 @@ export const AdminOverview = () => {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-500 flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-orange-500" />
-              Total Elections
+              {t('adminOverview.totalElections')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
               <div className="text-3xl font-bold text-orange-600">{totalElections}</div>
-              <div className="text-sm text-gray-500">All Time</div>
+              <div className="text-sm text-gray-500">{t('adminOverview.allTime')}</div>
             </div>
           </CardContent>
         </Card>
@@ -225,7 +243,9 @@ export const AdminOverview = () => {
         {/* Election Distribution Pie Chart */}
         <Card className="bg-white shadow-sm">
           <CardHeader className="border-b border-gray-100">
-            <CardTitle className="text-lg font-semibold text-gray-800">Election Distribution</CardTitle>
+            <CardTitle className="text-lg font-semibold text-gray-800">
+              {t('adminOverview.electionDistribution')}
+            </CardTitle>
           </CardHeader>
           <CardContent className="pt-6">
             <div className="h-[300px]">
@@ -244,29 +264,29 @@ export const AdminOverview = () => {
                     labelLine={true}
                   >
                     {distributionData.map((entry, index) => (
-                      <Cell 
-                        key={`cell-${index}`} 
-                        fill={COLORS[entry.name.toLowerCase() as keyof typeof COLORS]} 
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={
+                          COLORS[entry.name.toLowerCase().replace(/\s+/g, '') as keyof typeof COLORS] || COLORS.active
+                        }
                         className="transition-colors duration-200"
                       />
                     ))}
                   </Pie>
-                  <Tooltip 
-                    contentStyle={{ 
+                  <Tooltip
+                    contentStyle={{
                       backgroundColor: 'white',
                       border: '1px solid #e5e7eb',
                       borderRadius: '0.5rem',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
                     }}
                     formatter={(value: number) => [`${value} elections`, 'Count']}
                   />
-                  <Legend 
-                    layout="horizontal" 
-                    verticalAlign="bottom" 
+                  <Legend
+                    layout="horizontal"
+                    verticalAlign="bottom"
                     align="center"
-                    formatter={(value: string) => (
-                      <span className="text-sm font-medium text-gray-600">{value}</span>
-                    )}
+                    formatter={(value: string) => <span className="text-sm font-medium text-gray-600">{value}</span>}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -277,31 +297,37 @@ export const AdminOverview = () => {
         {/* Election Duration Statistics */}
         <Card className="bg-white shadow-sm">
           <CardHeader className="border-b border-gray-100">
-            <CardTitle className="text-lg font-semibold text-gray-800">Election Duration Statistics</CardTitle>
+            <CardTitle className="text-lg font-semibold text-gray-800">
+              {t('adminOverview.electionDurationStatistics')}
+            </CardTitle>
           </CardHeader>
           <CardContent className="pt-6">
             <div className="space-y-6">
               <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
-                <p className="text-sm font-medium text-gray-600 mb-1">Average Duration</p>
+                <p className="text-sm font-medium text-gray-600 mb-1">{t('adminOverview.averageDuration')}</p>
                 <p className="text-2xl font-semibold text-gray-900">
-                  {Math.round(averageDuration / (24 * 60 * 60))} days
+                  {Math.round(averageDuration / (24 * 60 * 60))} {t('adminOverview.days')}
                 </p>
               </div>
               {longestElection && (
                 <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
-                  <p className="text-sm font-medium text-gray-600 mb-1">Longest Election</p>
+                  <p className="text-sm font-medium text-gray-600 mb-1">{t('adminOverview.longestElection')}</p>
                   <p className="text-lg font-semibold text-gray-900">{longestElection.title}</p>
                   <p className="text-sm text-gray-500">
-                    {Math.round((Number(longestElection.endTime) - Number(longestElection.startTime)) / (24 * 60 * 60))} days
+                    {Math.round((Number(longestElection.endTime) - Number(longestElection.startTime)) / (24 * 60 * 60))}{' '}
+                    {t('adminOverview.days')}
                   </p>
                 </div>
               )}
               {shortestElection && (
                 <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
-                  <p className="text-sm font-medium text-gray-600 mb-1">Shortest Election</p>
+                  <p className="text-sm font-medium text-gray-600 mb-1">{t('adminOverview.shortestElection')}</p>
                   <p className="text-lg font-semibold text-gray-900">{shortestElection.title}</p>
                   <p className="text-sm text-gray-500">
-                    {Math.round((Number(shortestElection.endTime) - Number(shortestElection.startTime)) / (24 * 60 * 60))} days
+                    {Math.round(
+                      (Number(shortestElection.endTime) - Number(shortestElection.startTime)) / (24 * 60 * 60)
+                    )}{' '}
+                    {t('adminOverview.days')}
                   </p>
                 </div>
               )}
@@ -315,21 +341,26 @@ export const AdminOverview = () => {
         {/* Elections Starting Soon */}
         <Card className="bg-white shadow-sm">
           <CardHeader className="border-b border-gray-100">
-            <CardTitle className="text-lg font-semibold text-gray-800">Starting Soon</CardTitle>
+            <CardTitle className="text-lg font-semibold text-gray-800">{t('adminOverview.startingSoon')}</CardTitle>
           </CardHeader>
           <CardContent className="pt-6">
             <div className="space-y-4">
               {electionsStartingSoon.length > 0 ? (
                 electionsStartingSoon.map((election) => (
-                  <div key={election.id.toString()} className="p-4 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors">
+                  <div
+                    key={election.id.toString()}
+                    className="p-4 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors"
+                  >
                     <p className="font-medium text-gray-900">{election.title}</p>
                     <p className="text-sm text-gray-500">
-                      Starts in {Math.round((Number(election.startTime) - Math.floor(Date.now() / 1000)) / 3600)} hours
+                      {t('adminOverview.startsIn')}{' '}
+                      {Math.round((Number(election.startTime) - Math.floor(Date.now() / 1000)) / 3600)}{' '}
+                      {t('adminOverview.hours')}
                     </p>
                   </div>
                 ))
               ) : (
-                <p className="text-gray-500 text-center py-4">No elections starting soon</p>
+                <p className="text-gray-500 text-center py-4">{t('adminOverview.noElectionsStartingSoon')}</p>
               )}
             </div>
           </CardContent>
@@ -338,21 +369,28 @@ export const AdminOverview = () => {
         {/* Recently Completed */}
         <Card className="bg-white shadow-sm">
           <CardHeader className="border-b border-gray-100">
-            <CardTitle className="text-lg font-semibold text-gray-800">Recently Completed</CardTitle>
+            <CardTitle className="text-lg font-semibold text-gray-800">
+              {t('adminOverview.recentlyCompleted')}
+            </CardTitle>
           </CardHeader>
           <CardContent className="pt-6">
             <div className="space-y-4">
               {recentlyCompleted.length > 0 ? (
                 recentlyCompleted.map((election) => (
-                  <div key={election.id.toString()} className="p-4 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors">
+                  <div
+                    key={election.id.toString()}
+                    className="p-4 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors"
+                  >
                     <p className="font-medium text-gray-900">{election.title}</p>
                     <p className="text-sm text-gray-500">
-                      Completed {Math.round((Math.floor(Date.now() / 1000) - Number(election.endTime)) / 3600)} hours ago
+                      {t('adminOverview.completed')}{' '}
+                      {Math.round((Math.floor(Date.now() / 1000) - Number(election.endTime)) / 3600)}{' '}
+                      {t('adminOverview.hoursAgo')}
                     </p>
                   </div>
                 ))
               ) : (
-                <p className="text-gray-500 text-center py-4">No recently completed elections</p>
+                <p className="text-gray-500 text-center py-4">{t('adminOverview.noRecentlyCompleted')}</p>
               )}
             </div>
           </CardContent>
@@ -360,4 +398,4 @@ export const AdminOverview = () => {
       </div>
     </div>
   );
-}; 
+};

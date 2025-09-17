@@ -1,5 +1,6 @@
 import React from 'react';
 import CandidateCard from './CandidateCard';
+import { useTranslation } from 'react-i18next';
 
 interface CandidateListProps {
   candidates: any[];
@@ -20,10 +21,12 @@ const CandidateList: React.FC<CandidateListProps> = ({
   onVote,
   address,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="mb-16">
       <h2 className="text-2xl font-bold mb-6">
-        Candidates
+        {t('electionDetails.candidates.title')}
         <span className="ml-2 text-gray-500 font-normal">({candidates.length})</span>
       </h2>
 

@@ -18,6 +18,7 @@ import { prepareContractCall, getRpcClient, waitForReceipt } from 'thirdweb';
 import { electionFactoryContract, singleElectionContract } from '@/utils/thirdweb-client';
 import { ElectionCreationLoading } from './ElectionCreationLoading';
 import { determineElectionStatus } from '@/utils/determineElectionStatus';
+import { useTranslation } from 'react-i18next';
 
 interface Candidate {
   id: string;
@@ -36,6 +37,7 @@ interface ElectionCreationFormProps {
 }
 
 export const ElectionCreationForm = ({ onChange, initialData }: ElectionCreationFormProps) => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [formStep, setFormStep] = useState(1);
   const [csvFile, setCsvFile] = useState<File | null>(null);
@@ -279,7 +281,9 @@ export const ElectionCreationForm = ({ onChange, initialData }: ElectionCreation
           <div className="block md:hidden">
             <div className="bg-gray-100 rounded-lg p-3 mb-4">
               <div className="flex justify-between items-center">
-                <div className="text-sm font-medium">Step {formStep} of 3</div>
+                <div className="text-sm font-medium">
+                  {t('electionCreation.form.stepIndicator', { current: formStep, total: 3 })}
+                </div>
                 <div className="flex space-x-1">
                   {[1, 2, 3].map((step) => (
                     <div
@@ -299,7 +303,7 @@ export const ElectionCreationForm = ({ onChange, initialData }: ElectionCreation
                   onClick={() => setFormStep(1)}
                   className={formStep === 1 ? 'border-b-2 border-primary' : ''}
                 >
-                  Basic Info
+                  {t('electionCreation.form.tabs.basicInfo')}
                 </TabsTrigger>
                 {/* <TabsTrigger
                   value="voters"
@@ -313,14 +317,14 @@ export const ElectionCreationForm = ({ onChange, initialData }: ElectionCreation
                   onClick={() => setFormStep(2)}
                   className={formStep === 2 ? 'border-b-2 border-primary' : ''}
                 >
-                  Candidates
+                  {t('electionCreation.form.tabs.candidates')}
                 </TabsTrigger>
                 <TabsTrigger
                   value="settings"
                   onClick={() => setFormStep(3)}
                   className={formStep === 3 ? 'border-b-2 border-primary' : ''}
                 >
-                  Advanced Settings
+                  {t('electionCreation.form.tabs.advancedSettings')}
                 </TabsTrigger>
               </TabsList>
             </Tabs>

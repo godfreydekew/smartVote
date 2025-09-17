@@ -7,19 +7,24 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import { authService } from '@/api';
 import LoginNavbar from '@/components/LoginNavbar';
+import { useTranslation } from 'react-i18next';
 
-const formSchema = z.object({
-  email: z.string().email({
-    message: 'Please enter a valid email address',
-  }),
-});
+const createFormSchema = (t: any) =>
+  z.object({
+    email: z.string().email({
+      message: t('forms.forgotPassword.errors.emailRequired'),
+    }),
+  });
 
-type ForgotPasswordFormData = z.infer<typeof formSchema>;
+type ForgotPasswordFormData = z.infer<ReturnType<typeof createFormSchema>>;
 
 const ForgotPassword = () => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  const formSchema = createFormSchema(t);
 
   const {
     register,
@@ -35,14 +40,14 @@ const ForgotPassword = () => {
       await authService.requestPasswordReset(data.email);
       setIsSuccess(true);
       toast({
-        title: 'Password reset link sent',
-        description: 'Please check your email for further instructions.',
+        title: t('forms.forgotPassword.successTitle'),
+        description: t('forms.forgotPassword.successDescription'),
         variant: 'success',
       });
     } catch (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to send password reset link. Please try again.',
+        title: t('forms.forgotPassword.errorTitle'),
+        description: t('forms.forgotPassword.resetFailed'),
         variant: 'destructive',
       });
     } finally {
@@ -59,14 +64,12 @@ const ForgotPassword = () => {
           <div className="w-full max-w-md space-y-8 p-8 bg-white rounded-2xl shadow-[0_0_30px_rgba(0,0,0,0.1)] hover:shadow-[0_0_40px_rgba(0,0,0,0.15)] transition-all duration-300">
             <div className="text-center">
               <h2 className="text-4xl font-bold bg-gradient-to-r from-vote-blue to-vote-teal bg-clip-text text-transparent">
-                Forgot Password
+                {t('forms.forgotPassword.title')}
               </h2>
-              <p className="m-5 text-sm text-gray-600">
-                Enter your email address below and we'll send you a link to reset your password.
-              </p>
+              <p className="m-5 text-sm text-gray-600">{t('forms.forgotPassword.subtitle')}</p>
               {isSuccess ? (
                 <div className="text-center text-green-600">
-                  <p>A password reset link has been sent to your email address.</p>
+                  <p>{t('forms.forgotPassword.successMessage')}</p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -74,7 +77,7 @@ const ForgotPassword = () => {
                     <Input
                       id="email"
                       type="email"
-                      placeholder="Enter your email address"
+                      placeholder={t('forms.forgotPassword.emailPlaceholder')}
                       className="h-12 rounded-xl border-gray-200 focus:border-vote-blue focus:ring-vote-blue/20 transition-all"
                       {...register('email')}
                       disabled={isLoading}
@@ -87,7 +90,9 @@ const ForgotPassword = () => {
                       className="w-full h-12 rounded-xl bg-gradient-to-r from-vote-blue to-vote-teal hover:opacity-90 transition-all text-white font-medium shadow-lg hover:shadow-xl"
                       disabled={isLoading}
                     >
-                      {isLoading ? 'Sending...' : 'Send Reset Link'}
+                      {isLoading
+                        ? t('forms.forgotPassword.submitButtonLoading')
+                        : t('forms.forgotPassword.submitButton')}
                     </Button>
                   </div>
                 </form>

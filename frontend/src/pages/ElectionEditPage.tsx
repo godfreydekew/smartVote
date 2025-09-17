@@ -11,6 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { format } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,6 +24,7 @@ import {
 } from '@/components/ui/alert-dialog';
 
 const ElectionEditPage = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -55,8 +57,8 @@ const ElectionEditPage = () => {
   const saveChanges = () => {
     // In a real app, we would save the changes to the database here
     toast({
-      title: 'Changes saved',
-      description: 'Your draft has been saved.',
+      title: t('electionCreation.buttons.saveDraft'),
+      description: t('electionCreation.loading.creating'),
     });
     setHasUnsavedChanges(false);
     setUnsavedChangesCount(0);
@@ -70,11 +72,11 @@ const ElectionEditPage = () => {
 
     // In a real app, we would publish the election here
     const message = scheduled
-      ? `Election scheduled for publication on ${format(publishDate!, 'PP')}`
-      : 'Election published successfully';
+      ? `${t('electionCreation.loading.publishing')} ${format(publishDate!, 'PP')}`
+      : t('electionCreation.loading.ready');
 
     toast({
-      title: scheduled ? 'Election scheduled' : 'Election published',
+      title: scheduled ? t('electionCreation.loading.publishing') : t('electionCreation.loading.ready'),
       description: message,
     });
 
@@ -103,14 +105,14 @@ const ElectionEditPage = () => {
                 <div className="flex items-center space-x-4">
                   <Tabs value={isPreview ? 'preview' : 'edit'} onValueChange={(v) => setIsPreview(v === 'preview')}>
                     <TabsList>
-                      <TabsTrigger value="edit">Edit Mode</TabsTrigger>
-                      <TabsTrigger value="preview">Preview Mode</TabsTrigger>
+                      <TabsTrigger value="edit">{t('electionCreation.steps.basicInfo')}</TabsTrigger>
+                      <TabsTrigger value="preview">{t('electionCreation.steps.candidates')}</TabsTrigger>
                     </TabsList>
                   </Tabs>
 
                   <div className="hidden sm:block">
                     <Badge variant="outline" className="bg-gray-100">
-                      Draft - Not Visible to Voters
+                      {t('electionCreation.loading.creating')}
                     </Badge>
                   </div>
                 </div>
@@ -118,7 +120,9 @@ const ElectionEditPage = () => {
                 <div className="flex items-center space-x-2">
                   {unsavedChangesCount > 0 && (
                     <div className="text-xs text-gray-500 flex items-center">
-                      <span className="font-medium">{unsavedChangesCount} unsaved changes</span>
+                      <span className="font-medium">
+                        {unsavedChangesCount} {t('electionCreation.loading.creating')}
+                      </span>
                       <Progress value={100} className="w-16 h-1 ml-2" />
                     </div>
                   )}
@@ -130,7 +134,7 @@ const ElectionEditPage = () => {
                     disabled={!hasUnsavedChanges}
                     className="text-xs"
                   >
-                    <Save className="mr-1 h-3 w-3" /> Save Draft
+                    <Save className="mr-1 h-3 w-3" /> {t('electionCreation.buttons.saveDraft')}
                   </Button>
                 </div>
               </div>
@@ -143,11 +147,11 @@ const ElectionEditPage = () => {
                 <div>
                   <Button variant="ghost" size="sm" className="mb-2" onClick={handleExit}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Drafts
+                    {t('electionCreation.buttons.cancel')}
                   </Button>
 
-                  <h1 className="text-3xl font-bold text-gray-800">Edit Draft Election</h1>
-                  <p className="text-gray-600 mt-2">Make changes to your draft before publishing</p>
+                  <h1 className="text-3xl font-bold text-gray-800">{t('electionCreation.title')}</h1>
+                  <p className="text-gray-600 mt-2">{t('electionCreation.subtitle')}</p>
                 </div>
 
                 <div className="mt-4 sm:mt-0 flex flex-wrap gap-2">
@@ -155,13 +159,13 @@ const ElectionEditPage = () => {
                     <PopoverTrigger asChild>
                       <Button variant="outline" className="flex items-center gap-2">
                         <Calendar className="h-4 w-4" />
-                        Schedule Publish
+                        {t('electionCreation.loading.publishing')}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="end">
                       <div className="p-4 border-b">
-                        <h3 className="font-medium">Select Publication Date</h3>
-                        <p className="text-sm text-gray-500">Choose when this election should go live.</p>
+                        <h3 className="font-medium">{t('electionCreation.loading.publishing')}</h3>
+                        <p className="text-sm text-gray-500">{t('electionCreation.loading.creating')}</p>
                       </div>
                       <CalendarComponent
                         mode="single"
@@ -172,7 +176,7 @@ const ElectionEditPage = () => {
                       />
                       <div className="p-4 border-t flex justify-end">
                         <Button disabled={!publishDate} onClick={() => handlePublish(true)}>
-                          Confirm Schedule
+                          {t('electionCreation.buttons.createElection')}
                         </Button>
                       </div>
                     </PopoverContent>
@@ -180,7 +184,7 @@ const ElectionEditPage = () => {
 
                   <Button onClick={() => handlePublish(false)} className="flex items-center gap-2">
                     <Rocket className="h-4 w-4" />
-                    Publish Now
+                    {t('electionCreation.buttons.createElection')}
                   </Button>
                 </div>
               </div>
@@ -191,20 +195,16 @@ const ElectionEditPage = () => {
                     <div className="flex justify-center items-center bg-gray-100 rounded-lg p-12 mb-6">
                       <div className="text-center">
                         <Eye className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                        <h3 className="text-lg font-medium text-gray-900">Preview Mode</h3>
-                        <p className="mt-1 text-sm text-gray-500">
-                          This is how your election will appear to voters when published.
-                        </p>
+                        <h3 className="text-lg font-medium text-gray-900">{t('electionCreation.steps.candidates')}</h3>
+                        <p className="mt-1 text-sm text-gray-500">{t('electionCreation.loading.creating')}</p>
                         <Button onClick={() => setIsPreview(false)} className="mt-4" variant="outline">
-                          Return to Edit Mode
+                          {t('electionCreation.buttons.previous')}
                         </Button>
                       </div>
                     </div>
 
                     <div className="border-l-4 border-blue-400 pl-4 py-2 bg-blue-50">
-                      <p className="text-sm text-blue-700">
-                        In a real implementation, this would show a preview of the election.
-                      </p>
+                      <p className="text-sm text-blue-700">{t('electionCreation.loading.creating')}</p>
                     </div>
                   </div>
                 ) : (
@@ -223,15 +223,13 @@ const ElectionEditPage = () => {
         <AlertDialog open={showExitDialog} onOpenChange={setShowExitDialog}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>You have unsaved changes</AlertDialogTitle>
-              <AlertDialogDescription>
-                If you leave now, your unsaved changes will be lost. Do you want to save your draft before exiting?
-              </AlertDialogDescription>
+              <AlertDialogTitle>{t('electionCreation.errors.title')}</AlertDialogTitle>
+              <AlertDialogDescription>{t('electionCreation.errors.description')}</AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>{t('electionCreation.buttons.cancel')}</AlertDialogCancel>
               <Button variant="outline" onClick={() => navigate('/admin')} className="border-red-200 hover:bg-red-50">
-                Discard Changes
+                {t('electionCreation.buttons.cancel')}
               </Button>
               <Button
                 onClick={() => {
@@ -239,7 +237,7 @@ const ElectionEditPage = () => {
                   navigate('/admin');
                 }}
               >
-                Save Draft
+                {t('electionCreation.buttons.saveDraft')}
               </Button>
             </AlertDialogFooter>
           </AlertDialogContent>

@@ -1,4 +1,4 @@
-version: "3.8"
+version: '3.8'
 services:
   postgres:
     image: postgres:15
@@ -9,9 +9,9 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: newdb
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
-      - postgres_data:/var/lib/postgresql/data 
+      - postgres_data:/var/lib/postgresql/data
 
   backend:
     build:
@@ -21,10 +21,10 @@ services:
     restart: always
     depends_on:
       - postgres
-    environment:
-      DATABASE_URL: postgres://postgres:postgres@postgres:5432/newdb
+    env_file:
+      - ./backend/.env
     ports:
-      - "3001:3001"
+      - '3001:3001'
 
 volumes:
   postgres_data:

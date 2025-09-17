@@ -9,8 +9,11 @@ import { Button } from '@/components/ui/button';
 import { AdminOverview } from '@/components/admin/AdminOverview';
 import { AdminSecurity } from '@/components/admin/AdminSecurity';
 import { BackNavigation } from '@/components/navigation/BackNavigation';
+import { useTranslation } from 'react-i18next';
 
 const AdminDashboard = () => {
+  const { t } = useTranslation();
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="flex h-screen overflow-hidden">
@@ -24,16 +27,16 @@ const AdminDashboard = () => {
                   <div>
                     <div className="flex items-center">
                       <BackNavigation to="/dashboard" className="mr-4" />
-                      <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
+                      <h1 className="text-3xl font-bold text-gray-800">{t('adminDashboard.title')}</h1>
                     </div>
-                    <p className="text-gray-600 mt-2">Manage your platform's elections and settings</p>
+                    <p className="text-gray-600 mt-2">{t('adminDashboard.subtitle')}</p>
                   </div>
 
                   <div className="mt-4 sm:mt-0">
                     <Button asChild className="flex items-center gap-2">
                       <Link to="/admin/elections/create">
                         <Plus size={18} />
-                        <span>Create Election</span>
+                        <span>{t('adminDashboard.createElection')}</span>
                       </Link>
                     </Button>
                   </div>
@@ -42,28 +45,26 @@ const AdminDashboard = () => {
 
               <Alert className="mb-6 bg-blue-50 border-blue-200">
                 <InfoIcon className="h-4 w-4 text-blue-600" />
-                <AlertDescription className="text-blue-800">
-                  Welcome to the admin dashboard. Here you can manage elections and monitor platform activity.
-                </AlertDescription>
+                <AlertDescription className="text-blue-800">{t('adminDashboard.welcomeMessage')}</AlertDescription>
               </Alert>
 
               <Tabs defaultValue="overview" className="space-y-6">
                 <TabsList className="bg-white border shadow-sm">
                   <TabsTrigger value="overview" className="flex items-center gap-2">
                     <FileText size={18} />
-                    <span>Overview</span>
+                    <span>{t('adminDashboard.tabs.overview')}</span>
                   </TabsTrigger>
                   <TabsTrigger value="users" className="flex items-center gap-2">
                     <Users size={18} />
-                    <span>User Management</span>
+                    <span>{t('adminDashboard.tabs.userManagement')}</span>
                   </TabsTrigger>
                   <TabsTrigger value="settings" className="flex items-center gap-2">
                     <Settings size={18} />
-                    <span>System Settings</span>
+                    <span>{t('adminDashboard.tabs.systemSettings')}</span>
                   </TabsTrigger>
                   <TabsTrigger value="security" className="flex items-center gap-2">
                     <ShieldAlert size={18} />
-                    <span>Security Monitor</span>
+                    <span>{t('adminDashboard.tabs.securityMonitor')}</span>
                   </TabsTrigger>
                 </TabsList>
 
@@ -74,10 +75,10 @@ const AdminDashboard = () => {
                 <TabsContent value="users" className="animate-fade-in">
                   <Card>
                     <CardHeader>
-                      <CardTitle>User Management</CardTitle>
+                      <CardTitle>{t('adminDashboard.tabs.userManagement')}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-gray-500">This feature is coming soon. Stay tuned!</p>
+                      <p className="text-gray-500">{t('adminDashboard.comingSoon')}</p>
                     </CardContent>
                   </Card>
                 </TabsContent>
@@ -85,10 +86,10 @@ const AdminDashboard = () => {
                 <TabsContent value="settings" className="animate-fade-in">
                   <Card>
                     <CardHeader>
-                      <CardTitle>System Settings</CardTitle>
+                      <CardTitle>{t('adminDashboard.tabs.systemSettings')}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-gray-500">This feature is coming soon. Stay tuned!</p>
+                      <p className="text-gray-500">{t('adminDashboard.comingSoon')}</p>
                     </CardContent>
                   </Card>
                 </TabsContent>

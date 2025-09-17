@@ -2,7 +2,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from './AuthProvider';
 
 const AdminRoute = ({ children }: { children: JSX.Element }) => {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
 
   if (!user) {
     return <Navigate to="/login" replace />;
@@ -15,4 +15,4 @@ const AdminRoute = ({ children }: { children: JSX.Element }) => {
   return children;
 };
 
-export { AdminRoute};
+export { AdminRoute };

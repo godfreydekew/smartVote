@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { DashboardSidebar } from './DashboardSidebar';
 import { Link } from 'react-router-dom';
+import { LanguageSwitcher } from '../LanguageSwitcher';
 
 export const DashboardHeader = () => {
   return (
@@ -17,10 +18,8 @@ export const DashboardHeader = () => {
             <span className="bg-vote-blue text-white text-xs px-2 py-1 rounded-full ml-2">Beta</span>
           </Link>
           <div className="flex items-center gap-4">
-            <button className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
-              {/* <Bell className="h-6 w-6" /> */}
-              <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
-            </button>
+            <LanguageSwitcher />
+
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="relative hover:bg-gray-100">

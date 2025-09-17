@@ -1,46 +1,45 @@
 import React from 'react';
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 import { Mail, Phone, MapPin } from 'lucide-react';
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import PolicyNavbar from '@/components/PolicyNavbar';
+import { useTranslation } from 'react-i18next';
 
-const formSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email address"),
-  subject: z.string().min(5, "Subject must be at least 5 characters"),
-  message: z.string().min(10, "Message must be at least 10 characters"),
-});
+const createFormSchema = (t: any) =>
+  z.object({
+    name: z.string().min(2, t('contact.form.errors.nameRequired')),
+    email: z.string().email(t('contact.form.errors.emailRequired')),
+    subject: z.string().min(5, t('contact.form.errors.subjectRequired')),
+    message: z.string().min(10, t('contact.form.errors.messageRequired')),
+  });
 
 const ContactUs = () => {
+  const { t } = useTranslation();
   const { toast } = useToast();
-  const form = useForm<z.infer<typeof formSchema>>({
+
+  const formSchema = createFormSchema(t);
+
+  const form = useForm<z.infer<ReturnType<typeof createFormSchema>>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      subject: "",
-      message: "",
+      name: '',
+      email: '',
+      subject: '',
+      message: '',
     },
   });
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
+  const onSubmit = (data: z.infer<ReturnType<typeof createFormSchema>>) => {
     toast({
-      title: "Message sent!",
-      description: "We'll get back to you as soon as possible.",
+      title: t('contact.form.successTitle'),
+      description: t('contact.form.successDescription'),
     });
     form.reset();
   };
@@ -48,34 +47,36 @@ const ContactUs = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-gray-50 to-white">
       <PolicyNavbar />
-      
+
       <div className="flex-1 py-12">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Contact Us</h1>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
-            </p>
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">{t('contact.title')}</h1>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">{t('contact.subtitle')}</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {/* Contact Information Cards */}
             <Card className="p-6 text-center hover:shadow-lg transition-shadow shadow-[0_0_30px_rgba(0,0,0,0.1)] hover:shadow-[0_0_40px_rgba(0,0,0,0.15)] transition-all duration-300">
               <Mail className="w-8 h-8 text-vote-blue mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2 text-vote-blue">Email</h3>
-              <p className="text-gray-600 leading-relaxed">dekewgodfrey@gmail.com</p>
+              <h3 className="text-lg font-semibold mb-2 text-vote-blue">{t('contact.contactInfo.email.title')}</h3>
+              <p className="text-gray-600 leading-relaxed">{t('contact.contactInfo.email.value')}</p>
             </Card>
 
             <Card className="p-6 text-center hover:shadow-lg transition-shadow shadow-[0_0_30px_rgba(0,0,0,0.1)] hover:shadow-[0_0_40px_rgba(0,0,0,0.15)] transition-all duration-300">
               <Phone className="w-8 h-8 text-vote-blue mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2 text-vote-blue">Phone</h3>
-              <p className="text-gray-600 leading-relaxed">+90 548865 8336</p>
+              <h3 className="text-lg font-semibold mb-2 text-vote-blue">{t('contact.contactInfo.phone.title')}</h3>
+              <p className="text-gray-600 leading-relaxed">{t('contact.contactInfo.phone.value')}</p>
             </Card>
 
             <Card className="p-6 text-center hover:shadow-lg transition-shadow shadow-[0_0_30px_rgba(0,0,0,0.1)] hover:shadow-[0_0_40px_rgba(0,0,0,0.15)] transition-all duration-300">
               <MapPin className="w-8 h-8 text-vote-blue mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2 text-vote-blue">Office</h3>
-              <p className="text-gray-600 leading-relaxed">Northern Cyprus<br />European University of Lefke</p>
+              <h3 className="text-lg font-semibold mb-2 text-vote-blue">{t('contact.contactInfo.office.title')}</h3>
+              <p className="text-gray-600 leading-relaxed">
+                {t('contact.contactInfo.office.value')}
+                <br />
+                {t('contact.contactInfo.office.address')}
+              </p>
             </Card>
 
             {/* Contact Form */}
@@ -88,9 +89,9 @@ const ContactUs = () => {
                       name="name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-vote-blue">Name</FormLabel>
+                          <FormLabel className="text-vote-blue">{t('contact.form.name')}</FormLabel>
                           <FormControl>
-                            <Input placeholder="Your name" {...field} />
+                            <Input placeholder={t('contact.form.namePlaceholder')} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -102,9 +103,9 @@ const ContactUs = () => {
                       name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-vote-blue">Email</FormLabel>
+                          <FormLabel className="text-vote-blue">{t('contact.form.email')}</FormLabel>
                           <FormControl>
-                            <Input type="email" placeholder="your@email.com" {...field} />
+                            <Input type="email" placeholder={t('contact.form.emailPlaceholder')} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -117,9 +118,9 @@ const ContactUs = () => {
                     name="subject"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-vote-blue">Subject</FormLabel>
+                        <FormLabel className="text-vote-blue">{t('contact.form.subject')}</FormLabel>
                         <FormControl>
-                          <Input placeholder="How can we help you?" {...field} />
+                          <Input placeholder={t('contact.form.subjectPlaceholder')} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -131,10 +132,10 @@ const ContactUs = () => {
                     name="message"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-vote-blue">Message</FormLabel>
+                        <FormLabel className="text-vote-blue">{t('contact.form.message')}</FormLabel>
                         <FormControl>
-                          <Textarea 
-                            placeholder="Your message..." 
+                          <Textarea
+                            placeholder={t('contact.form.messagePlaceholder')}
                             className="min-h-[150px]"
                             {...field}
                           />
@@ -144,11 +145,11 @@ const ContactUs = () => {
                     )}
                   />
 
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     className="w-full md:w-auto bg-gradient-to-r from-vote-blue to-vote-teal hover:from-vote-blue/90 hover:to-vote-teal/90 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300"
                   >
-                    Send Message
+                    {t('contact.form.submitButton')}
                   </Button>
                 </form>
               </Form>

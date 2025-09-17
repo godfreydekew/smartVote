@@ -16,17 +16,19 @@ import { client } from '@/utils/thirdweb-client';
 import LoginNavbar from '@/components/LoginNavbar';
 import { Eye, EyeOff, CheckCircle2 } from 'lucide-react';
 import InfoNotification from '@/components/InfoNotification';
+import { useTranslation } from 'react-i18next';
 
-const formSchema = z.object({
-  email: z.string().email({
-    message: 'Please enter a valid email address',
-  }),
-  password: z.string().min(1, {
-    message: 'Password is required',
-  }),
-});
+const createFormSchema = (t: any) =>
+  z.object({
+    email: z.string().email({
+      message: t('forms.auth.login.errors.emailRequired'),
+    }),
+    password: z.string().min(1, {
+      message: t('forms.auth.login.errors.passwordRequired'),
+    }),
+  });
 
-type FormData = z.infer<typeof formSchema>;
+type FormData = z.infer<ReturnType<typeof createFormSchema>>;
 
 interface LoginError {
   response?: {
@@ -38,6 +40,7 @@ interface LoginError {
 }
 
 const Login = () => {
+  const { t } = useTranslation();
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -49,6 +52,8 @@ const Login = () => {
   const [showPasswordHelp, setShowPasswordHelp] = useState(false);
   const location = useLocation();
   const from = location.state?.from?.pathname || '/dashboard';
+
+  const formSchema = createFormSchema(t);
 
   const {
     register,
@@ -88,15 +93,15 @@ const Login = () => {
     try {
       toast({
         title: `${data?.email}`,
-        description: 'Please wait while we log you in.',
+        description: t('forms.auth.login.loadingMessage'),
         variant: 'default',
       });
 
       await login(data.email, data.password);
 
       toast({
-        title: 'Login successful',
-        description: 'You are now logged in.',
+        title: t('forms.auth.login.successTitle'),
+        description: t('forms.auth.login.successDescription'),
         variant: 'success',
       });
 
@@ -105,7 +110,7 @@ const Login = () => {
       console.error('Login error:', error);
       const loginError = error as LoginError;
       toast({
-        title: 'Login failed',
+        title: t('forms.auth.login.errorTitle'),
         description: loginError?.response?.data?.message || loginError?.message || 'An unexpected error occurred',
         variant: 'destructive',
       });
@@ -140,9 +145,9 @@ const Login = () => {
         <div className="w-full max-w-md space-y-8 p-8 bg-white rounded-2xl shadow-[0_0_30px_rgba(0,0,0,0.1)] hover:shadow-[0_0_40px_rgba(0,0,0,0.15)] transition-all duration-300">
           <div className="text-center space-y-4">
             <h2 className="text-4xl font-bold bg-gradient-to-r from-vote-blue to-vote-teal bg-clip-text text-transparent">
-              Welcome Back
+              {t('forms.auth.login.title')}
             </h2>
-            <p className="text-gray-700 text-xl">Sign in to continue your journey</p>
+            <p className="text-gray-700 text-xl">{t('forms.auth.login.subtitle')}</p>
 
             {/* Step Indicator */}
             <div className="flex items-center justify-center space-x-4 mt-6">
@@ -152,7 +157,7 @@ const Login = () => {
                 >
                   1
                 </div>
-                <span className="ml-2 text-sm font-medium">Verify Email</span>
+                <span className="ml-2 text-sm font-medium">{t('forms.auth.login.step1')}</span>
               </div>
               <div className="w-8 h-0.5 bg-gray-300"></div>
               <div className={`flex items-center ${account?.address ? 'text-vote-blue' : 'text-gray-400'}`}>
@@ -161,7 +166,7 @@ const Login = () => {
                 >
                   2
                 </div>
-                <span className="ml-2 text-sm font-medium">Sign In</span>
+                <span className="ml-2 text-sm font-medium">{t('forms.auth.login.step2')}</span>
               </div>
             </div>
           </div>
@@ -170,13 +175,13 @@ const Login = () => {
           {!account?.address ? (
             <div className="text-center p-4 bg-gray-50 rounded-xl border border-gray-100">
               <Connect />
-              <p className="mt-2 text-sm text-gray-600">Step 1: Verify your email to proceed to sign in</p>
+              <p className="mt-2 text-sm text-gray-600">{t('forms.auth.login.step1Description')}</p>
             </div>
           ) : (
             <div className="text-center p-4 bg-green-50 rounded-xl border border-green-200">
               <div className="flex items-center justify-center text-green-700">
                 <CheckCircle2 className="h-6 w-6 mr-2" />
-                <p className="font-semibold">Email Verified Successfully</p>
+                <p className="font-semibold">{t('forms.auth.login.step1Complete')}</p>
               </div>
               <p className="mt-1 text-sm text-green-600">{profiles?.[0]?.details?.email}</p>
             </div>
@@ -185,48 +190,45 @@ const Login = () => {
           <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
             <div className="space-y-4">
               {!account?.address ? (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div>
-                        <Label htmlFor="email" className="text-gray-900 font-semibold text-base">
-                          Email
-                        </Label>
-                        <div className="w-full cursor-not-allowed" onClick={() => setShowEmailHelp(true)}>
-                          <Input
-                            id="email"
-                            type="email"
-                            required
-                            className="mt-1 h-12 rounded-xl border-gray-200 focus:border-vote-blue focus:ring-vote-blue/20 transition-all w-full"
-                            placeholder="Complete Step 1 to auto-fill"
-                            {...register('email')}
-                            disabled
-                            style={{ pointerEvents: 'none' }} // Make the input itself unclickable
-                          />
-                        </div>
-                        {showEmailHelp && (
-                          <p className="mt-2 text-sm text-vote-blue">
-                            Please complete Step 1 (Verify Email) above. Your email address will be automatically filled
-                            in here after you connect.
-                          </p>
-                        )}
-                        {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div>
+                      <Label htmlFor="email" className="text-gray-900 font-semibold text-base">
+                        {t('forms.auth.login.email')}
+                      </Label>
+                      <div className="w-full cursor-not-allowed" onClick={() => setShowEmailHelp(true)}>
+                        <Input
+                          id="email"
+                          type="email"
+                          required
+                          className="mt-1 h-12 rounded-xl border-gray-200 focus:border-vote-blue focus:ring-vote-blue/20 transition-all w-full"
+                          placeholder={t('forms.auth.login.emailAutoFill')}
+                          {...register('email')}
+                          disabled
+                          style={{ pointerEvents: 'none' }}
+                        />
                       </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="top">
-                      <p>Please connect your account first</p>
-                    </TooltipContent>
-                  </Tooltip>
+                      {showEmailHelp && (
+                        <p className="mt-2 text-sm text-vote-blue">{t('forms.auth.login.emailHelp')}</p>
+                      )}
+                      {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">
+                    <p>{t('forms.auth.login.connectFirst')}</p>
+                  </TooltipContent>
+                </Tooltip>
               ) : (
                 <div>
                   <Label htmlFor="email" className="text-gray-900 font-semibold text-base">
-                    Email
+                    {t('forms.auth.login.email')}
                   </Label>
                   <Input
                     id="email"
                     type="email"
                     required
                     className="mt-1 h-12 rounded-xl border-gray-200 focus:border-vote-blue focus:ring-vote-blue/20 transition-all w-full"
-                    placeholder="Enter your email"
+                    placeholder={t('forms.auth.login.emailPlaceholder')}
                     {...register('email')}
                     disabled
                   />
@@ -234,48 +236,46 @@ const Login = () => {
                 </div>
               )}
               {!account?.address ? (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div>
-                        <Label htmlFor="password" className="text-gray-900 font-semibold text-base">
-                          Password
-                        </Label>
-                        <div className="relative" onClick={() => setShowPasswordHelp(true)}>
-                          <Input
-                            id="password"
-                            type={showPassword ? 'text' : 'password'}
-                            required
-                            className="mt-1 h-12 rounded-xl border-gray-200 focus:border-vote-blue focus:ring-vote-blue/20 transition-all pr-12"
-                            placeholder="Enter your password"
-                            {...register('password')}
-                            disabled
-                            style={{ pointerEvents: 'none' }} // Make the input itself unclickable
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-vote-blue transition-colors"
-                            disabled
-                          >
-                            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                          </button>
-                        </div>
-                        {showPasswordHelp && (
-                          <p className="mt-2 text-sm text-vote-blue">
-                            Please complete Step 1 (Verify Email) before entering your password.
-                          </p>
-                        )}
-                        {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div>
+                      <Label htmlFor="password" className="text-gray-900 font-semibold text-base">
+                        {t('forms.auth.login.password')}
+                      </Label>
+                      <div className="relative" onClick={() => setShowPasswordHelp(true)}>
+                        <Input
+                          id="password"
+                          type={showPassword ? 'text' : 'password'}
+                          required
+                          className="mt-1 h-12 rounded-xl border-gray-200 focus:border-vote-blue focus:ring-vote-blue/20 transition-all pr-12"
+                          placeholder={t('forms.auth.login.passwordPlaceholder')}
+                          {...register('password')}
+                          disabled
+                          style={{ pointerEvents: 'none' }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-vote-blue transition-colors"
+                          disabled
+                        >
+                          {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        </button>
                       </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="top">
-                      <p>Please connect your account first</p>
-                    </TooltipContent>
-                  </Tooltip>
+                      {showPasswordHelp && (
+                        <p className="mt-2 text-sm text-vote-blue">{t('forms.auth.login.passwordHelp')}</p>
+                      )}
+                      {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">
+                    <p>{t('forms.auth.login.connectFirst')}</p>
+                  </TooltipContent>
+                </Tooltip>
               ) : (
                 <div>
                   <Label htmlFor="password" className="text-gray-900 font-semibold text-base">
-                    Password
+                    {t('forms.auth.login.password')}
                   </Label>
                   <div className="relative">
                     <Input
@@ -283,7 +283,7 @@ const Login = () => {
                       type={showPassword ? 'text' : 'password'}
                       required
                       className="mt-1 h-12 rounded-xl border-gray-200 focus:border-vote-blue focus:ring-vote-blue/20 transition-all pr-12"
-                      placeholder="Enter your password"
+                      placeholder={t('forms.auth.login.passwordPlaceholder')}
                       {...register('password')}
                       disabled={isSubmitting}
                     />
@@ -307,18 +307,18 @@ const Login = () => {
                 className="w-full h-12 rounded-xl bg-gradient-to-r from-vote-blue to-vote-teal hover:opacity-90 transition-all text-white font-medium shadow-lg hover:shadow-xl"
                 disabled={isSubmitting || !account?.address}
               >
-                {isSubmitting ? 'Signing in...' : 'Sign in'}
+                {isSubmitting ? t('forms.auth.login.submitButtonLoading') : t('forms.auth.login.submitButton')}
               </Button>
             </div>
 
             <div className="text-center space-y-4">
               <p className="text-gray-600">
-                Don't have an account?{' '}
+                {t('forms.auth.login.signupLink')}{' '}
                 <Link
                   to="/signup"
                   className="font-semibold text-vote-blue hover:text-vote-teal transition-colors underline-offset-4 hover:underline"
                 >
-                  Create one now
+                  {t('forms.auth.login.signupLinkText')}
                 </Link>
               </p>
               <p className="text-gray-600">
@@ -326,7 +326,7 @@ const Login = () => {
                   to="/forgot-password"
                   className="font-semibold text-vote-blue hover:text-vote-teal transition-colors underline-offset-4 hover:underline"
                 >
-                  Forgot Password?
+                  {t('forms.auth.login.forgotPassword')}
                 </Link>
               </p>
             </div>

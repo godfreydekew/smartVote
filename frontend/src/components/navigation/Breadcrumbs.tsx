@@ -11,6 +11,7 @@ import {
   BreadcrumbEllipsis,
 } from '@/components/ui/breadcrumb';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useTranslation } from 'react-i18next';
 
 interface BreadcrumbRoute {
   path: string;
@@ -24,32 +25,31 @@ export interface BreadcrumbsProps {
 }
 
 const defaultRouteMap: Record<string, BreadcrumbRoute[]> = {
-  '/dashboard': [
-    { path: '/dashboard', label: 'Dashboard', visible: true }
-  ],
+  '/dashboard': [{ path: '/dashboard', label: 'dashboard', visible: true }],
   '/admin': [
-    { path: '/dashboard', label: 'Dashboard', visible: true },
-    { path: '/admin', label: 'Admin', visible: true }
+    { path: '/dashboard', label: 'dashboard', visible: true },
+    { path: '/admin', label: 'admin', visible: true },
   ],
   '/admin/elections/create': [
-    { path: '/dashboard', label: 'Dashboard', visible: false },
-    { path: '/admin', label: 'Admin', visible: true },
-    { path: '/admin/elections/create', label: 'Create Election', visible: true }
+    { path: '/dashboard', label: 'dashboard', visible: false },
+    { path: '/admin', label: 'admin', visible: true },
+    { path: '/admin/elections/create', label: 'createElection', visible: true },
   ],
   '/elections': [
-    { path: '/dashboard', label: 'Dashboard', visible: true },
-    { path: '/elections', label: 'Elections', visible: true }
+    { path: '/dashboard', label: 'dashboard', visible: true },
+    { path: '/elections', label: 'elections', visible: true },
   ],
   '/profile': [
-    { path: '/dashboard', label: 'Dashboard', visible: true },
-    { path: '/profile', label: 'Profile', visible: true }
-  ]
+    { path: '/dashboard', label: 'dashboard', visible: true },
+    { path: '/profile', label: 'profile', visible: true },
+  ],
 };
 
 export function Breadcrumbs({ routes, className }: BreadcrumbsProps) {
   const location = useLocation();
   const isMobile = useIsMobile();
-  
+  const { t } = useTranslation();
+
   // Dynamic breadcrumb generation based on current path
   const getBreadcrumbRoutes = () => {
     if (routes) {
@@ -60,32 +60,34 @@ export function Breadcrumbs({ routes, className }: BreadcrumbsProps) {
     if (location.pathname.match(/\/election\/(.+)/)) {
       const electionId = location.pathname.split('/')[2];
       return [
-        { path: '/dashboard', label: 'Dashboard', visible: !isMobile },
-        { path: '/dashboard', label: 'Elections', visible: true },
-        { path: `/election/${electionId}`, label: 'Election Details', visible: true }
+        { path: '/dashboard', label: 'dashboard', visible: !isMobile },
+        { path: '/dashboard', label: 'elections', visible: true },
+        { path: `/election/${electionId}`, label: 'electionDetails', visible: true },
       ];
     }
-    
+
     // If this is an election edit page
     if (location.pathname.match(/\/elections\/(.+)\/edit/)) {
       const electionId = location.pathname.split('/')[2];
       return [
-        { path: '/dashboard', label: 'Dashboard', visible: !isMobile },
-        { path: '/admin', label: 'Admin', visible: !isMobile },
-        { path: '/admin', label: 'Elections', visible: true },
-        { path: `/elections/${electionId}/edit`, label: 'Edit Election', visible: true }
+        { path: '/dashboard', label: 'dashboard', visible: !isMobile },
+        { path: '/admin', label: 'admin', visible: !isMobile },
+        { path: '/admin', label: 'elections', visible: true },
+        { path: `/elections/${electionId}/edit`, label: 'editElection', visible: true },
       ];
     }
 
     // Default paths
-    return defaultRouteMap[location.pathname] || [
-      { path: '/dashboard', label: 'Dashboard', visible: true },
-      { path: location.pathname, label: 'Current Page', visible: true }
-    ];
+    return (
+      defaultRouteMap[location.pathname] || [
+        { path: '/dashboard', label: 'dashboard', visible: true },
+        { path: location.pathname, label: 'currentPage', visible: true },
+      ]
+    );
   };
 
   const breadcrumbRoutes = getBreadcrumbRoutes();
-  const visibleRoutes = breadcrumbRoutes.filter(route => route.visible !== false);
+  const visibleRoutes = breadcrumbRoutes.filter((route) => route.visible !== false);
   const hasCollapsed = breadcrumbRoutes.length !== visibleRoutes.length;
 
   return (
@@ -101,17 +103,17 @@ export function Breadcrumbs({ routes, className }: BreadcrumbsProps) {
                 <BreadcrumbSeparator />
               </>
             )}
-            
+
             <BreadcrumbItem>
               {index === visibleRoutes.length - 1 ? (
-                <BreadcrumbPage>{route.label}</BreadcrumbPage>
+                <BreadcrumbPage>{t(`navigation.${route.label}`)}</BreadcrumbPage>
               ) : (
                 <BreadcrumbLink asChild>
-                  <Link to={route.path}>{route.label}</Link>
+                  <Link to={route.path}>{t(`navigation.${route.label}`)}</Link>
                 </BreadcrumbLink>
               )}
             </BreadcrumbItem>
-            
+
             {index < visibleRoutes.length - 1 && (
               <BreadcrumbSeparator>
                 <ChevronRight className="h-4 w-4" />

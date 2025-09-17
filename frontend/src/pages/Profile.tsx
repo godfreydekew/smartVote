@@ -9,7 +9,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Shield, Mail, Globe, Calendar, User, CheckCircle2, XCircle, Edit2, Trash2, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useDisconnect, useActiveWallet } from "thirdweb/react";
+import { useDisconnect, useActiveWallet } from 'thirdweb/react';
 import { userService } from '@/api';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -19,8 +19,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 
 interface ProfileData {
   address: string;
@@ -41,6 +42,7 @@ const Profile = () => {
   const { disconnect } = useDisconnect();
   const wallet = useActiveWallet();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const handleDeleteAccount = async () => {
@@ -57,28 +59,28 @@ const Profile = () => {
       await logout();
 
       toast({
-        title: "Account deleted",
-        description: "Your account has been successfully deleted.",
-        variant: "success",
+        title: t('profile.accountDeleted'),
+        description: t('profile.accountDeletedDescription'),
+        variant: 'success',
       });
 
       navigate('/');
     } catch (error) {
       console.error('Error deleting account:', error);
       toast({
-        title: "Error",
-        description: "Failed to delete account. Please try again.",
-        variant: "destructive",
+        title: t('profile.error'),
+        description: t('profile.errorDescription'),
+        variant: 'destructive',
       });
     }
   };
 
-  //when deleteing account 
+  //when deleteing account
   const handleProfileUpdate = (data: ProfileData) => {
     console.log('Profile data updated:', data);
     toast({
-      title: "Profile updated",
-      description: "Your profile information has been updated successfully.",
+      title: t('profile.profileUpdated'),
+      description: t('profile.profileUpdatedDescription'),
     });
   };
 
@@ -86,7 +88,7 @@ const Profile = () => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
 
@@ -95,9 +97,9 @@ const Profile = () => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   };
 
   const itemVariants = {
@@ -106,19 +108,19 @@ const Profile = () => {
       y: 0,
       opacity: 1,
       transition: {
-        duration: 0.5
-      }
-    }
+        duration: 0.5,
+      },
+    },
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <DashboardHeader />
-      
+
       <div className="pt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Profile Header */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -143,23 +145,12 @@ const Profile = () => {
                   </p>
                 </div>
                 <div className="mt-4 sm:mt-0 flex items-center space-x-4">
-                  {/* <Badge 
-                    variant={user?.kyc_session_id ? "default" : "destructive"} 
-                    className="text-sm px-4 py-2 rounded-full shadow-sm hover:shadow-md transition-shadow duration-300"
-                  >
-                    {user?.kyc_verified ? (
-                      <CheckCircle2 className="h-4 w-4 mr-1" />
-                    ) : (
-                      <XCircle className="h-4 w-4 mr-1" />
-                    )}
-                    {user?.kyc_verified ? 'KYC Verified' : 'KYC Not Verified'}
-                  </Badge> */}
                   <button
                     onClick={() => setIsDeleteDialogOpen(true)}
                     className="flex items-center px-4 py-2 text-red-600 bg-red-50 rounded-full hover:bg-red-100 transition-colors duration-300"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
-                    Delete Account
+                    {t('profile.deleteAccount')}
                   </button>
                 </div>
               </div>
@@ -172,18 +163,13 @@ const Profile = () => {
               <DialogHeader>
                 <DialogTitle className="flex items-center text-red-600">
                   <AlertTriangle className="h-5 w-5 mr-2" />
-                  Delete Account
+                  {t('profile.deleteAccountTitle')}
                 </DialogTitle>
-                <DialogDescription className="pt-4">
-                  Are you sure you want to delete your account? This action cannot be undone. All your data will be permanently deleted.
-                </DialogDescription>
+                <DialogDescription className="pt-4">{t('profile.deleteAccountDescription')}</DialogDescription>
               </DialogHeader>
               <DialogFooter className="flex space-x-2 justify-end pt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => setIsDeleteDialogOpen(false)}
-                >
-                  Cancel
+                <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+                  {t('profile.cancel')}
                 </Button>
                 <Button
                   variant="destructive"
@@ -192,14 +178,14 @@ const Profile = () => {
                     handleDeleteAccount();
                   }}
                 >
-                  Delete Account
+                  {t('profile.deleteAccount')}
                 </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
 
           {/* Main Content Grid */}
-          <motion.div 
+          <motion.div
             variants={containerVariants}
             initial="hidden"
             animate="visible"
@@ -210,7 +196,7 @@ const Profile = () => {
               <motion.div variants={itemVariants}>
                 <Card className="p-8 rounded-2xl shadow-[0_0_30px_rgba(0,0,0,0.1)] hover:shadow-[0_0_40px_rgba(0,0,0,0.15)] transition-all duration-300">
                   <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-2xl font-semibold text-gray-900">Personal Information</h2>
+                    <h2 className="text-2xl font-semibold text-gray-900">{t('profile.personalInformation')}</h2>
                     <button className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-300">
                       {/* <Edit2 className="h-5 w-5 text-vote-blue" /> */}
                     </button>
@@ -221,17 +207,17 @@ const Profile = () => {
                         <div className="p-3 rounded-full bg-vote-blue/10">
                           <Mail className="h-6 w-6 text-vote-blue" />
                         </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Email</p>
+                        <div>
+                          <p className="text-sm text-gray-500">{t('profile.email')}</p>
                           <p className="font-medium text-gray-900">{user?.email}</p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors duration-300">
                         <div className="p-3 rounded-full bg-vote-blue/10">
                           <Globe className="h-6 w-6 text-vote-blue" />
-                    </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Country</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">{t('profile.country')}</p>
                           <p className="font-medium text-gray-900 capitalize">{user?.country_of_residence}</p>
                         </div>
                       </div>
@@ -240,53 +226,54 @@ const Profile = () => {
                       <div className="flex items-center space-x-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors duration-300">
                         <div className="p-3 rounded-full bg-vote-blue/10">
                           <User className="h-6 w-6 text-vote-blue" />
-                  </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Age</p>
-                          <p className="font-medium text-gray-900">{user?.age} years</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">{t('profile.age')}</p>
+                          <p className="font-medium text-gray-900">
+                            {user?.age} {t('profile.years')}
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors duration-300">
                         <div className="p-3 rounded-full bg-vote-blue/10">
                           <Calendar className="h-6 w-6 text-vote-blue" />
-                    </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Member Since</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">{t('profile.memberSince')}</p>
                           <p className="font-medium text-gray-900">{formatDate(user?.created_at)}</p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </Card>
+                </Card>
               </motion.div>
 
               <motion.div variants={itemVariants}>
                 <Card className="p-8 rounded-2xl shadow-[0_0_30px_rgba(0,0,0,0.1)] hover:shadow-[0_0_40px_rgba(0,0,0,0.15)] transition-all duration-300">
-                  <h2 className="text-2xl font-semibold text-gray-900 mb-8">Blockchain Information</h2>
+                  <h2 className="text-2xl font-semibold text-gray-900 mb-8">{t('profile.blockchainInformation')}</h2>
                   <div className="space-y-6">
                     <div className="flex items-center space-x-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors duration-300">
                       <div className="p-3 rounded-full bg-vote-blue/10">
                         <Shield className="h-6 w-6 text-vote-blue" />
                       </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Wallet Address</p>
+                      <div>
+                        <p className="text-sm text-gray-500">{t('profile.walletAddress')}</p>
                         <p className="font-mono text-sm break-all text-gray-900">{user?.address}</p>
+                      </div>
+                      <button onClick={() => disconnect(wallet)}>{t('profile.disconnect')}</button>
                     </div>
-                    <button onClick={() => disconnect(wallet)}>Disconnect</button>
                   </div>
-                </div>
-              </Card>
+                </Card>
               </motion.div>
             </div>
-            
 
             {/* Right Column - Admin Panel & Connect */}
             <div className="space-y-8">
               <motion.div variants={itemVariants}>
-              <AdminAccessPanel isAdmin={user?.user_role === 'admin'} />
+                <AdminAccessPanel isAdmin={user?.user_role === 'admin'} />
               </motion.div>
               <motion.div variants={itemVariants}>
-              <Connect />
+                <Connect />
               </motion.div>
             </div>
           </motion.div>
