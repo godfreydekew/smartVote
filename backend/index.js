@@ -29,10 +29,10 @@ app.use(
     origin: [
       'http://localhost:3000',
       'http://10.5.48.95:3000',
-      'https://smart-vote-ten.vercel.app/',
+      'https://smart-vote-ten.vercel.app',
     ],
     credentials: true,
-    exposedHeaders: ['set-cookie'],
+    exposedHeaders: ['Set-Cookie'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-csrf-token'],
   })

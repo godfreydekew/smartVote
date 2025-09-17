@@ -5,7 +5,7 @@ const {
   } = require('../../database/queries/analytics/analyticsQueries');
   
   const getGeneralOverview = async (req, res) => {
-    const ownerUserId = req.user.id; 
+    const ownerUserId = req.query; 
   
     try {
       const overview = await fetchGeneralOverview(ownerUserId);

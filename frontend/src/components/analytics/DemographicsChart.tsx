@@ -18,9 +18,9 @@ export const DemographicsChart: React.FC<DemographicsChartProps> = ({
   regionalDistribution
 }) => {
   const genderData = [
-    { name: 'Male', value: genderDistribution.male, color: 'hsl(var(--chart-1))' },
-    { name: 'Female', value: genderDistribution.female, color: 'hsl(var(--chart-2))' },
-    { name: 'Other', value: genderDistribution.other, color: 'hsl(var(--chart-3))' },
+    { name: 'Male', value: genderDistribution?.male || 0, color: 'hsl(var(--chart-1))' },
+    { name: 'Female', value: genderDistribution?.female || 0, color: 'hsl(var(--chart-2))' },
+    { name: 'Other', value: genderDistribution?.other || 0, color: 'hsl(var(--chart-3))' },
   ].filter(item => item.value > 0);
 
   const regionalData = Object.entries(regionalDistribution).map(([region, count]) => ({

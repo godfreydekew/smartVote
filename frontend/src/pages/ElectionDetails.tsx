@@ -13,7 +13,7 @@ import CandidateDetailDialog from '@/components/election/CandidateDetailDialog';
 import VoteConfirmDialog from '@/components/election/VoteConfirmDialog';
 import VoteConfirmation from '@/components/vote/VoteConfirmation';
 import { BlockchainLogs } from '@/components/election/BlockchainLogs';
-import { ElectionStats } from '@/components/election/ElectionStats';
+import { ElectionAnalytics } from '@/components/election/ElectionAnalytics';
 
 import { electionService } from '@/api';
 import { useEffect } from 'react';
@@ -286,7 +286,7 @@ const ElectionDetailsPage = () => {
       if (dbVoteResponse.hasVoted || blockchainVoteStatus) {
         toast({
           title: 'Vote Confirmation',
-          description: `You have already voted in this election.`,
+          description: `You have already voted in this election.`, 
           duration: 1000,
         });
         return;
@@ -392,11 +392,9 @@ const ElectionDetailsPage = () => {
           address={address}
         />
 
-        {/* Election Stats Section - Only visible to admin users */}
-        {election.status === 'completed' && (
-          <ElectionStats
-            address={address}
-          />
+        {/* Election Analytics Section - Only visible when election is active or completed */}
+        {(isActive || isCompleted) && (
+          <ElectionAnalytics />
         )}
 
         {/* Blockchain Logs Section - Only visible to admin users */}

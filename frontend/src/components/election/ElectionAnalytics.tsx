@@ -4,13 +4,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, BarChart3, Users, TrendingUp, Clock, Award } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { MetricCard } from '../components/analytics/MetricCard';
-import { VoteTurnoutChart } from '../components/analytics/VoteTurnoutChart';
-import { VotesOverTimeChart } from '../components/analytics/VotesOverTimeChart';
-import { DemographicsChart } from '../components/analytics/DemographicsChart';
-import { analyticsService, type AnalyticsResponse } from '../api/services/analyticsService';
+import { MetricCard } from '../analytics/MetricCard';
+import { VoteTurnoutChart } from '../analytics/VoteTurnoutChart';
+import { VotesOverTimeChart } from '../analytics/VotesOverTimeChart';
+import { DemographicsChart } from '../analytics/DemographicsChart';
+import { analyticsService } from '@/api';
+import type { AnalyticsResponse } from '@/api/services/analyticsService';
 
-const ElectionAnalytics = () => {
+export const ElectionAnalytics = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -48,7 +49,7 @@ const ElectionAnalytics = () => {
   }, [id, toast]);
 
   const handleGoBack = () => {
-    navigate('/admin');
+    navigate('/dashboard');
   };
 
   if (loading) {
@@ -89,9 +90,6 @@ const ElectionAnalytics = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" onClick={handleGoBack} className="p-2">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
               <div>
                 <h1 className="text-2xl font-bold text-foreground">Election Analytics</h1>
                 <p className="text-muted-foreground">{electionData.title}</p>
@@ -108,7 +106,7 @@ const ElectionAnalytics = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <div className="max-w-7xl mx-auto my-5">
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <MetricCard
@@ -127,10 +125,10 @@ const ElectionAnalytics = () => {
           />
           <MetricCard
             title="Voter Turnout"
-            value={`${electionData.voter_turnout_percentage.toFixed(1)}%`}
+            value={`${(electionData.voter_turnout_percentage || 0).toFixed(1)}%`}
             icon={TrendingUp}
-            variant={electionData.voter_turnout_percentage >= 70 ? 'success' : 
-                   electionData.voter_turnout_percentage >= 50 ? 'warning' : 'danger'}
+            variant={electionData.voter_turnout_percentage || 0 >= 70 ? 'success' : 
+                   electionData.voter_turnout_percentage || 0 >= 50 ? 'warning' : 'danger'}
             subtitle="Participation rate"
           />
           <MetricCard
@@ -147,7 +145,7 @@ const ElectionAnalytics = () => {
           <VoteTurnoutChart
             totalVotes={electionData.total_votes}
             eligibleVoters={electionData.total_eligible_voters}
-            turnoutPercentage={electionData.voter_turnout_percentage}
+            turnoutPercentage={electionData.voter_turnout_percentage || 0}
           />
           <VotesOverTimeChart data={votesOverTime} />
         </div>
@@ -155,7 +153,7 @@ const ElectionAnalytics = () => {
         {/* Demographics */}
         <DemographicsChart
           genderDistribution={electionData.gender_distribution}
-          regionalDistribution={electionData.regional_distribution}
+          regionalDistribution={electionData.regional_distribution || {}}
         />
 
         {/* Summary Card */}
@@ -172,13 +170,13 @@ const ElectionAnalytics = () => {
                 <h4 className="font-semibold text-foreground">Participation</h4>
                 <p className="text-sm text-muted-foreground">
                   {electionData.total_votes} out of {electionData.total_eligible_voters} eligible voters participated, 
-                  resulting in a {electionData.voter_turnout_percentage.toFixed(1)}% turnout rate.
+                  resulting in a {(electionData.voter_turnout_percentage || 0).toFixed(1)}% turnout rate.
                 </p>
               </div>
               <div className="space-y-2">
                 <h4 className="font-semibold text-foreground">Demographics</h4>
                 <p className="text-sm text-muted-foreground">
-                  Votes were distributed across {Object.keys(electionData.regional_distribution).length} regions 
+                  Votes were distributed across {Object.keys(electionData.regional_distribution || {}).length} regions 
                   with representation from all demographic groups.
                 </p>
               </div>
@@ -198,5 +196,3 @@ const ElectionAnalytics = () => {
     </div>
   );
 };
-
-export default ElectionAnalytics;

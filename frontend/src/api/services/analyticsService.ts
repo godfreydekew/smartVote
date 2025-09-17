@@ -69,7 +69,7 @@ export async function getElectionAnalytics(
     if (opts?.to) params.to = opts.to;
     if (opts?.granularity) params.granularity = opts.granularity;
 
-    const url = `/analytics/${encodeURIComponent(String(electionId))}`;
+    const url = `/analytics/election/${encodeURIComponent(String(electionId))}`;
     const resp = await apiClient.get<AnalyticsResponse>(url, { params });
     return resp.data;
   } catch (err) {

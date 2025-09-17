@@ -3,16 +3,22 @@ const { pool } = require('../../db');
 // general overview analytics per user.
 const fetchGeneralOverview = async (ownerUserId) => {
   const query = `
+    WITH user_elections AS (
+      SELECT
+        *,
+        EXTRACT(EPOCH FROM (end_date - start_date)) AS duration_seconds
+      FROM elections
+      WHERE owner_user_id = $1
+    )
     SELECT
-        COUNT(*) AS total_elections,
-        SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) AS active_elections,
-        SUM(CASE WHEN status = 'upcoming' THEN 1 ELSE 0 END) AS upcoming_elections,
-        SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) AS completed_elections,
-        AVG(EXTRACT(EPOCH FROM (end_date - start_date)))) AS average_duration_seconds,
-        (SELECT title FROM elections WHERE owner_user_id = $1 ORDER BY (end_date - start_date) DESC LIMIT 1) AS longest_election_title,
-        (SELECT title FROM elections WHERE owner_user_id = $1 ORDER BY (end_date - start_date) ASC LIMIT 1) AS shortest_election_title
-    FROM elections
-    WHERE owner_user_id = $1;
+      COUNT(*) AS total_elections,
+      SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) AS active_elections,
+      SUM(CASE WHEN status = 'upcoming' THEN 1 ELSE 0 END) AS upcoming_elections,
+      SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) AS completed_elections,
+      AVG(duration_seconds) AS average_duration_seconds,
+      (SELECT title FROM user_elections ORDER BY duration_seconds DESC NULLS LAST LIMIT 1) AS longest_election_title,
+      (SELECT title FROM user_elections ORDER BY duration_seconds ASC NULLS LAST LIMIT 1) AS shortest_election_title
+    FROM user_elections;
   `;
   const { rows } = await pool.query(query, [ownerUserId]);
   return rows[0];
