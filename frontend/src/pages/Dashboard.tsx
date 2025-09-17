@@ -65,6 +65,8 @@ const Dashboard = () => {
                   </Link>
                 </Button>
               </div>
+              
+              <KYCNotification />
 
               <Tabs defaultValue="overview" className="space-y-6">
                 <TabsList className="bg-white border shadow-sm p-1 rounded-lg">
