@@ -11,6 +11,7 @@ const userRoutes = require('./routes/userRoutes.js');
 const electionRoutes = require('./routes/electionRoutes.js');
 const kycRoutes = require('./routes/kyc.js');
 const analyticsRoutes = require('./routes/analyticsRoutes');
+const etherscanRoutes = require('./routes/etherscanRoutes');
 const { createTables } = require('./database/migrations/createTables.js');
 //const { dropTables } = require('./database/migrations/dropTables.js');
 
@@ -79,6 +80,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/admin', electionRoutes);
 app.use('/api/kyc', kycRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/etherscan', etherscanRoutes);
 
 app.get('/', (req, res) => {
   res.status(200).json({ message: 'Welcome to the voting system' });
