@@ -34,7 +34,7 @@ const Navbar = () => {
               className="text-2xl font-bold tracking-tight text-vote-blue transition-all duration-300 group-hover:scale-105"
               whileHover={{ scale: 1.05 }}
             >
-              Smart<span className="text-vote-teal">Vote</span>
+              Şeffaf<span className="text-vote-teal">Katılım</span>
             </motion.span>
             <motion.span 
               whileHover={{ scale: 1.05 }}

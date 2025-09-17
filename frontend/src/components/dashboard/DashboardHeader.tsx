@@ -1,7 +1,7 @@
 import React from 'react';
 import { Bell, Search, UserRound } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { DashboardSidebar } from './DashboardSidebar';
 import { Link } from 'react-router-dom';
 
@@ -12,7 +12,7 @@ export const DashboardHeader = () => {
         <div className="flex items-center justify-between h-16">
           <Link to="/dashboard" className="flex items-center">
             <span className="text-2xl font-bold text-vote-blue">
-              Smart<span className="text-vote-teal">Vote</span>
+              Şeffaf<span className="text-vote-teal">Katılım</span>
             </span>
             <span className="bg-vote-blue text-white text-xs px-2 py-1 rounded-full ml-2">Beta</span>
           </Link>
@@ -28,6 +28,8 @@ export const DashboardHeader = () => {
                 </Button>
               </SheetTrigger>
               <SheetContent className="p-0">
+                <SheetTitle className="sr-only">Profile Menu</SheetTitle>
+                <SheetDescription className="sr-only">Access your profile settings and navigation options.</SheetDescription>
                 <DashboardSidebar />
               </SheetContent>
             </Sheet>

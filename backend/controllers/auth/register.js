@@ -1,5 +1,7 @@
 require('dotenv').config();
 const { createUser } = require('../../database/queries/userQueries.js');
+const { linkInvitedUser } = require('../../database/queries/elections/linkInvitedUser.js');
+const { addUserToEligibleElections } = require('../../database/queries/elections/addUserToEligibleElections.js');
 const bcrypt = require('bcrypt');
 const yup = require('yup');
 
@@ -30,6 +32,12 @@ const postUser = async (req, res) => {
       gender,
       countryOfResidence
     );
+
+    // After creating the user, check if they match criteria for any upcoming elections
+    await addUserToEligibleElections(user);
+
+    // Check for pending invitations and link them to the new user account
+    await linkInvitedUser(user.id, user.email);
 
     res.status(201).json({ message: 'User created successfully', user });
   } catch (error) {

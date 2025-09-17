@@ -154,7 +154,7 @@ const Security = () => {
                   >
                     <div className="font-medium text-gray-900">Feature</div>
                     <div className="font-medium text-center text-gray-900">Traditional Voting</div>
-                    <div className="font-medium text-center text-gray-900">SmartVote</div>
+                    <div className="font-medium text-center text-gray-900">Şeffaf Katılım</div>
                   </motion.div>
                   
                   {comparisonFeatures.map((feature, index) => (

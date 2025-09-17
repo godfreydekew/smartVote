@@ -3,11 +3,20 @@ const {
   fetchElectionById,
   fetchElectionsByStatus,
 } = require('../../database/queries/elections/fetchElection');
+const { fetchPublicAndEligibleElections } = require('../../database/queries/elections/fetchPublicAndEligibleElections');
 
 // Fetch all elections
 const getElections = async (req, res) => {
   try {
-    const elections = await fetchAllElections();
+    const user = req.session.user;
+    let elections;
+
+    if (user && user.role === 'admin') {
+      elections = await fetchAllElections();
+    } else if (user) {
+      elections = await fetchPublicAndEligibleElections(user.id);
+    }
+
     res.status(200).json({ elections });
   } catch (error) {
     res.status(500).json({

@@ -10,9 +10,10 @@ async function createElection(electionData) {
     status = 'upcoming',
     imageURL,
     organization,
-    isPublic,
+    type,
+    kyc_required,
     accessControl,
-    ageRestriction,
+    age_restriction,
     regions,
     useCaptcha = false,
     rules,
@@ -35,7 +36,8 @@ async function createElection(electionData) {
         status,
         image_url,
         organization,
-        is_public,
+        type,
+        kyc_required,
         access_control,
         age_restriction,
         regions,
@@ -47,7 +49,7 @@ async function createElection(electionData) {
         smart_contract_address,
         owner_address,
         owner_user_id
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
       RETURNING *
       `,
       [
@@ -58,9 +60,10 @@ async function createElection(electionData) {
         status,
         imageURL,
         organization,
-        isPublic,
+        type,
+        kyc_required,
         accessControl,
-        ageRestriction,
+        age_restriction,
         regions,
         useCaptcha,
         rules,

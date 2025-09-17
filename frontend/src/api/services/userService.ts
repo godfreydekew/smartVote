@@ -10,22 +10,27 @@ export interface UpdateUserRequest {
 const userService = {
 
   getUserByEmail: async (email: string) => {
-    const response = await apiClient.get('/', { params: { email } });
+    const response = await apiClient.get('/user/', { params: { email } });
     return response.data;
   },
 
   getUserById: async (userId: string) => {
-    const response = await apiClient.get(`/${userId}`);
+    const response = await apiClient.get(`/user/${userId}`);
     return response.data;
   },
 
   updateUser: async (userId: string, userData: UpdateUserRequest) => {
-    const response = await apiClient.put(`/${userId}`, userData);
+    const response = await apiClient.put(`/user/${userId}`, userData);
+    return response.data;
+  },
+
+  updateIdentityCommitment: async (userId: string, identitycommitment: string) => {
+    const response = await apiClient.put(`/user/${userId}/identity-commitment`, { identitycommitment });
     return response.data;
   },
 
   deleteUser: async (userId: string) => {
-    const response = await apiClient.delete(`/user`);
+    const response = await apiClient.delete(`/user/`);
     return response.data;
   },
 

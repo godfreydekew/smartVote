@@ -2,14 +2,8 @@
 pragma solidity ^0.8.0;
 
 contract AutoElection {
-
-    enum ElectionState {
-        UPCOMING,
-        ACTIVE,
-        COMPLETED,
-        CANCELLED
-    }
-
+    enum ElectionState { UPCOMING, ACTIVE, COMPLETED, CANCELLED }
+    
     struct Election {
         uint256 id;
         string title;
@@ -21,11 +15,13 @@ contract AutoElection {
         uint256 totalVotes;
         bool exists;
     }
+
     struct Candidate {
         uint256 id;
         string name;
         uint256 voteCount;
     }
+
     struct CandidateInput {
         uint256 id;
         string name;
@@ -37,6 +33,7 @@ contract AutoElection {
     }
 
     Election public election;
+    // Candidate[] public candidates;
     mapping(uint256 => Candidate) public candidates;
     uint256[] public candidateIds;
     mapping(address => Voter) public voters;
@@ -47,9 +44,15 @@ contract AutoElection {
     event ElectionStateChanged(ElectionState newState);
     event ElectionCancelled();
 
-    constructor(uint256 _id, string memory _title, uint256 _startTime, uint256 _endTime, bool _isPublic) {
-        require(_startTime > block.timestamp, 'Start time must be in future');
-        require(_endTime > _startTime, 'End time must be after start time');
+    constructor(
+        uint256 _id,
+        string memory _title,
+        uint256 _startTime,
+        uint256 _endTime,
+        bool _isPublic
+    ) {
+        require(_startTime > block.timestamp, "Start time must be in future");
+        require(_endTime > _startTime, "End time must be after start time");
 
         election = Election({
             id: _id,
@@ -66,21 +69,21 @@ contract AutoElection {
         emit ElectionCreated(_id, _title, _startTime, _endTime);
     }
 
-
     modifier onlyOwner() {
-        require(msg.sender == election.owner, 'Only owner can perform this action');
+        require(msg.sender == election.owner, "Only owner can perform this action");
         _;
     }
 
     modifier onlyValidState(ElectionState requiredState) {
         updateElectionState();
-        require(election.state == requiredState, 'Invalid election state');
+        require(election.state == requiredState, "Invalid election state");
         _;
     }
 
+    // Automatically updates election state based on time
     function updateElectionState() public {
         if (election.state == ElectionState.CANCELLED) return;
-
+        
         if (block.timestamp >= election.endTime && election.state != ElectionState.COMPLETED) {
             election.state = ElectionState.COMPLETED;
             emit ElectionStateChanged(ElectionState.COMPLETED);
@@ -90,34 +93,46 @@ contract AutoElection {
         }
     }
 
-    function addCandidate(uint256 _dbId, string memory _name) public onlyOwner {
-        require(candidates[_dbId].id == 0, 'Candidate exists');
+    function addCandidate(
+        uint256 _dbId,
+        string memory _name
+    ) public onlyOwner {
+        require(candidates[_dbId].id == 0, "Candidate exists");
 
-        candidates[_dbId] = Candidate({id: _dbId, name: _name, voteCount: 0});
-
+        candidates[_dbId] = Candidate({
+            id: _dbId,
+            name: _name,
+            voteCount: 0
+        });
+        
         candidateIds.push(_dbId);
 
         emit CandidateAdded(_dbId, _name);
     }
 
     function vote(uint256 _candidateId) public onlyValidState(ElectionState.ACTIVE) {
-        require(bytes(candidates[_candidateId].name).length > 0, 'Invalid candidate ID');
-        require(!voters[msg.sender].hasVoted, 'Already voted');
+
+        require(bytes(candidates[_candidateId].name).length > 0, "Invalid candidate ID");
+        require(!voters[msg.sender].hasVoted, "Already voted");
 
         candidates[_candidateId].voteCount++;
         election.totalVotes++;
 
-        voters[msg.sender] = Voter({hasVoted: true, voteTime: block.timestamp});
+        voters[msg.sender] = Voter({
+            hasVoted: true,
+            voteTime: block.timestamp
+        });
 
         emit VoteCast(msg.sender, _candidateId);
     }
 
     function cancelElection() public onlyOwner {
-        require(election.state != ElectionState.COMPLETED, 'Cannot cancel completed election');
+        require(election.state != ElectionState.COMPLETED, "Cannot cancel completed election");
         election.state = ElectionState.CANCELLED;
         emit ElectionCancelled();
     }
 
+    // View functions for frontend filtering
     function getElectionState() public view returns (ElectionState) {
         if (election.state == ElectionState.CANCELLED) return ElectionState.CANCELLED;
         if (block.timestamp >= election.endTime) return ElectionState.COMPLETED;
@@ -125,11 +140,10 @@ contract AutoElection {
         return ElectionState.UPCOMING;
     }
 
-    function getElectionDetails()
-        public
-        view
-        returns (uint256, string memory, uint256, uint256, ElectionState, bool, uint256)
-    {
+    function getElectionDetails() public view returns (
+        uint256, string memory, uint256, uint256, 
+        ElectionState, bool, uint256
+    ) {
         ElectionState currentState = getElectionState();
         return (
             election.id,
@@ -150,8 +164,10 @@ contract AutoElection {
         return allCandidates;
     }
 
+
     function getSortedResults() public view returns (Candidate[] memory) {
-        Candidate[] memory sorted = getCandidates();
+         Candidate[] memory sorted = getCandidates();
+
 
         for (uint256 i = 0; i < sorted.length; i++) {
             for (uint256 j = i + 1; j < sorted.length; j++) {
@@ -166,24 +182,23 @@ contract AutoElection {
         return sorted;
     }
 
-    function hasVoted(address voter) public view returns (bool) {
+    function hasVoted(address voter) public view returns (bool){
         return voters[voter].hasVoted;
     }
 
     function getCandidatesById(uint256 candidateId) public view returns (Candidate memory) {
-        require(bytes(candidates[candidateId].name).length > 0, 'Invalid candidate ID');
+        require(bytes(candidates[candidateId].name).length > 0, "Invalid candidate ID");
         return candidates[candidateId];
     }
 
     function getElectionStats() public view returns (uint256 totalVotes, uint256 totalCandidates) {
         return (election.totalVotes, candidateIds.length);
-    }
+    } 
 
     function isEligibleToVote(address voter) public view returns (bool) {
-        return
-            !voters[voter].hasVoted &&
-            election.state == ElectionState.ACTIVE &&
-            block.timestamp >= election.startTime &&
+        return !voters[voter].hasVoted && 
+            election.state == ElectionState.ACTIVE && 
+            block.timestamp >= election.startTime && 
             block.timestamp < election.endTime;
     }
 
@@ -192,6 +207,9 @@ contract AutoElection {
     }
 
     function timeRemaining() public view returns (uint256) {
-        return election.endTime > block.timestamp ? election.endTime - block.timestamp : 0;
+        return election.endTime > block.timestamp 
+            ? election.endTime - block.timestamp 
+            : 0;
     }
+
 }

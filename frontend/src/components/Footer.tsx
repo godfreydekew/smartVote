@@ -38,7 +38,7 @@ const Footer = () => {
             to="/" 
             className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-vote-blue to-vote-teal hover:opacity-80 transition-opacity"
           >
-              Smart<span className="text-vote-teal">Vote</span>
+              Şeffaf<span className="text-vote-teal">Katılım</span>
             </Link>
 
           {/* Navigation Links */}
@@ -88,7 +88,7 @@ const Footer = () => {
 
           {/* Copyright */}
           <p className="text-sm text-gray-500">
-            © {currentYear} SmartVote. All rights reserved.
+            © {currentYear} Şeffaf Katılım. All rights reserved.
           </p>
         </div>
       </div>

@@ -16,9 +16,11 @@ export interface Candidate {
     rules: string[];
     startDate: Date;
     endDate: Date;
-    isPublic: boolean;
-    accessControl: 'csv' | 'manual' | 'invite' | 'public';
-    ageRestriction: [number];
+    type: 'public' | 'private' | 'invite-only';
+    kycRequired?: boolean;
+    invitedEmails?: string[];
+    accessControl?: 'csv' | 'manual' | 'invite' | 'public';
+    ageRestriction: [number, number];
     regions: string[];
     useCaptcha: boolean;
     candidates: Candidate[];

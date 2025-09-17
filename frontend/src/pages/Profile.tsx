@@ -143,7 +143,7 @@ const Profile = () => {
                   </p>
                 </div>
                 <div className="mt-4 sm:mt-0 flex items-center space-x-4">
-                  {/* <Badge 
+                  <Badge 
                     variant={user?.kyc_session_id ? "default" : "destructive"} 
                     className="text-sm px-4 py-2 rounded-full shadow-sm hover:shadow-md transition-shadow duration-300"
                   >
@@ -153,7 +153,7 @@ const Profile = () => {
                       <XCircle className="h-4 w-4 mr-1" />
                     )}
                     {user?.kyc_verified ? 'KYC Verified' : 'KYC Not Verified'}
-                  </Badge> */}
+                  </Badge>
                   <button
                     onClick={() => setIsDeleteDialogOpen(true)}
                     className="flex items-center px-4 py-2 text-red-600 bg-red-50 rounded-full hover:bg-red-100 transition-colors duration-300"

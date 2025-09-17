@@ -10,6 +10,8 @@ const { getElection } = require('../controllers/elections/getElection.js');
 const { deleteElection } = require('../controllers/elections/deleteElection.js');
 const { postVote } = require('../controllers/elections/postVote.js');
 const { hasVoted } = require('../controllers/elections/postVote.js');
+const { startElection } = require('../controllers/elections/startElection.js');
+const { isEligible } = require('../controllers/elections/isEligible.js');
 
 router.post('/election', authenticateSession, postElection);
 router.get('/elections', authenticateSession, getElections);
@@ -19,7 +21,9 @@ router.delete('/election/:electionId', authenticateSession, deleteElection);
 
 router.put('/election/vote/:electionId', authenticateSession, postVote);
 router.get('/election/has-voted/:electionId', authenticateSession, hasVoted);
+router.get('/election/is-eligible/:electionId', authenticateSession, isEligible);
 
+router.put('/election/:electionId/start', authenticateSession, startElection);
 
 router.post('/candidate/:electionId', postCandidates, authenticateSession);
 router.get('/candidates/:electionId', authenticateSession, getCandidatesByElectionId);

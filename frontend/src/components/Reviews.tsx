@@ -8,14 +8,14 @@ const reviewsData = [
   {
     name: "Sarah Johnson",
     role: "Election Commissioner",
-    content: "SmartVote has revolutionized our electoral process. The security and transparency it provides are unmatched.",
+    content: "Şeffaf Katılım has revolutionized our electoral process. The security and transparency it provides are unmatched.",
     rating: 5,
     color: "from-blue-500 to-cyan-500"
   },
   {
     name: "Michael Chen",
     role: "City Council Member",
-    content: "Implementing SmartVote was seamless. Our voter turnout increased by 30% due to the easy-to-use interface.",
+    content: "Implementing Şeffaf Katılım was seamless. Our voter turnout increased by 30% due to the easy-to-use interface.",
     rating: 5,
     color: "from-vote-blue to-vote-teal"
   },
@@ -79,7 +79,7 @@ const Reviews = () => {
             variants={itemVariants}
             className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed"
           >
-            See what election officials and organizations say about their experience with SmartVote
+            See what election officials and organizations say about their experience with Şeffaf Katılım
           </motion.p>
         </motion.div>
 

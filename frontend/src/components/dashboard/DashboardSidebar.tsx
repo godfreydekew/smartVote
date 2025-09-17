@@ -46,7 +46,7 @@ export const DashboardSidebar = () => {
     <aside className="h-full w-full bg-white border-r border-gray-100 flex flex-col">
       <div className="p-6 border-b border-gray-100">
         <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-vote-blue to-vote-teal">
-          SmartVote
+          Şeffaf Katılım
         </h2>
       </div>
 

@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { AdminOverview } from '@/components/admin/AdminOverview';
 import { motion } from 'framer-motion';
+import KYCNotification from '@/components/KYCNotification';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -24,8 +25,9 @@ const Dashboard = () => {
             <DashboardHeader />
             <DashboardHero />
             <main className="p-6">
-              <div className="max-w-7xl mx-auto">
-                <Breadcrumbs className="mb-4" />
+              <div className="max-w-7xl mx-auto space-y-4">
+                <Breadcrumbs />
+                {!user?.kyc_verified && <KYCNotification />}
                 <ElectionTabs />
               </div>
             </main>

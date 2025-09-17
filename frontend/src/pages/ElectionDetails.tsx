@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -16,7 +16,6 @@ import { BlockchainLogs } from '@/components/election/BlockchainLogs';
 import { ElectionAnalytics } from '@/components/election/ElectionAnalytics';
 
 import { electionService } from '@/api';
-import { useEffect } from 'react';
 import { userService } from '@/api';
 import { singleElectionContract } from '@/utils/thirdweb-client';
 import { useAuth } from '@/auth/AuthProvider';
@@ -50,6 +49,7 @@ const ElectionDetailsPage = () => {
   const status = searchParams.get('status');
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [isEligible, setIsEligible] = useState(false);
   
   const [election, setElectionData] = useState<{
     title: string;
@@ -62,6 +62,10 @@ const ElectionDetailsPage = () => {
     participants: number;
     progress: number;
     rules: string[];
+    type: 'public' | 'private' | 'invite-only';
+    kyc_required?: boolean;
+    age_restriction?: [number, number];
+    regions?: string[];
   } | null>(null);
   const [candidates, setCandidateData] = useState<Candidate[] | null>(null);
 
@@ -152,11 +156,20 @@ const ElectionDetailsPage = () => {
             totalVotes: blockchainVoteCount, 
             participants: response.election.participants,
             progress: response.election.progress,
-            rules: response.election.rules
+            rules: response.election.rules,
+            type: response.election.type,
+            kyc_required: response.election.kyc_required,
+            age_restriction: response.election.age_restriction,
+            regions: response.election.regions,
           };
 
           setElectionData(electionData);
           setCandidateData(candresponse.candidates);
+
+          if (user) {
+            const eligibilityResponse = await electionService.isEligible(Number(id));
+            setIsEligible(eligibilityResponse.isEligible);
+          }
         } else {
           console.error('Election not found');
         }
@@ -166,7 +179,7 @@ const ElectionDetailsPage = () => {
     };
 
     fetchElectionData();
-  }, [electionDetails, id, status]); // Added electionDetails as a dependency
+  }, [electionDetails, id, status, user]); // Added electionDetails as a dependency
 
   useEffect(() => {
     if (user?.address && election && candidates) {
@@ -373,6 +386,10 @@ const ElectionDetailsPage = () => {
               participants={election.participants}
               totalVotes={election.totalVotes}
               isActive={isActive}
+              type={election.type}
+              kycRequired={election.kyc_required}
+              ageRestriction={election.age_restriction}
+              regions={election.regions}
             />
           </div>
 
@@ -382,15 +399,19 @@ const ElectionDetailsPage = () => {
         </div>
 
         {/* Candidates Section */}
-        <CandidateList
-          candidates={candidates}
-          totalVotes={election.totalVotes}
-          isActive={isActive}
-          isCompleted={isCompleted}
-          onViewProfile={openCandidateDetail}
-          onVote={initiateVote}
-          address={address}
-        />
+        <div id='candidates'>
+          <CandidateList
+            candidates={candidates}
+            totalVotes={election.totalVotes}
+            isActive={isActive}
+            isCompleted={isCompleted}
+            onViewProfile={openCandidateDetail}
+            onVote={initiateVote}
+            address={address}
+            isEligible={isEligible}
+            hasUserVoted={hasUserVoted}
+          />
+        </div>
 
         {/* Election Analytics Section - Only visible when election is active or completed */}
         {(isActive || isCompleted) && (
@@ -415,6 +436,8 @@ const ElectionDetailsPage = () => {
         isActive={isActive}
         isCompleted={isCompleted}
         totalVotes={election.totalVotes}
+        isEligible={isEligible}
+        hasUserVoted={hasUserVoted}
       />
 
       {/* Vote Confirmation Dialog */}
@@ -428,8 +451,8 @@ const ElectionDetailsPage = () => {
       {/* Sticky Mobile Action Button */}
       {isActive && (
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 md:hidden">
-          <Button className="w-full" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            View candidates and vote
+          <Button className="w-full" onClick={() => document.getElementById("candidates").scrollIntoView({ behavior: "smooth" })}>
+            View candidates {isEligible ? 'and vote' : ''}
           </Button>
         </div>
       )}

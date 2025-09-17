@@ -14,6 +14,7 @@ interface Election {
   status: 'active' | 'upcoming' | 'completed';
   date: string;
   address: string;
+  type: 'public' | 'private' | 'invite-only';
 }
 
 interface ElectionsGridProps {
