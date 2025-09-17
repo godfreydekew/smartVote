@@ -84,8 +84,8 @@ const electionService = {
     return response.data;
   },
 
-  vote: async (electionId: number) => {
-    const response = await apiClient.put(`/admin/election/vote/${electionId}`);
+  vote: async (electionId: number, candidateId: number) => {
+    const response = await apiClient.put(`/admin/election/vote/${electionId}`, { candidateId });
     return response.data;
   },
 

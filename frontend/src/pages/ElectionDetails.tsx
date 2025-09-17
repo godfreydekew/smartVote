@@ -317,7 +317,7 @@ const ElectionDetailsPage = () => {
 
       // If blockchain transaction successful, record in database
       if (txResult) {
-        const voteResponse = await electionService.vote(Number(id));
+        const voteResponse = await electionService.vote(Number(id), Number(candidateToVote.id));
         setVoteTx(txResult);
         if (voteResponse) {
           toast({
