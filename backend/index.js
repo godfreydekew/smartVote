@@ -13,14 +13,18 @@ const kycRoutes = require('./routes/kyc.js');
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const etherscanRoutes = require('./routes/etherscanRoutes');
 const { createTables } = require('./database/migrations/createTables.js');
-//const { dropTables } = require('./database/migrations/dropTables.js');
+const { dropTables } = require('./database/migrations/dropTables.js');
+const { updateElectionsTable } = require('./database/migrations/add_election_type.js');
+const { updateCandidatesTable } = require('./database/migrations/update_candidates_table.js');
 
 const app = express();
 const server = createServer(app);
 const port = 3001;
 
 //dropTables()
-createTables()
+//createTables()
+//updateElectionsTable();
+//updateCandidatesTable();
 
 app.use(express.json());
 

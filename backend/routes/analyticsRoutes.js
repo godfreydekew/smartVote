@@ -7,6 +7,6 @@ const {
 } = require('../controllers/analytics/analyticsController');
 
 router.get('/overview', authenticateToken, getGeneralOverview);
-router.get('/election/:electionId', authenticateToken, getElectionAnalytics);
+router.get('/election/:electionId', getElectionAnalytics);
 
 module.exports = router;
