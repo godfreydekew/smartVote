@@ -21,5 +21,5 @@ if [ ! -f .env ]; then
     cp .env.example .env
 fi
 
-yarn install 
+npm install --legacy-peer-deps
 echo "Installing frontend dependencies completed"

@@ -6,6 +6,8 @@ async function dropTables() {
   try {
     await client.query('BEGIN');
 
+    await client.query('DROP TABLE IF EXISTS vote_logs CASCADE;');
+    await client.query('DROP TABLE IF EXISTS election_analytics CASCADE;');
     await client.query('DROP TABLE IF EXISTS notifications CASCADE;');
     await client.query('DROP TABLE IF EXISTS forget_password CASCADE;');
     await client.query('DROP TABLE IF EXISTS eligible_voters CASCADE;');
@@ -27,7 +29,7 @@ async function dropTables() {
   }
 }
 
-dropTables()
+// dropTables()
 
 module.exports = {
   dropTables

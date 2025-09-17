@@ -7,21 +7,36 @@ const { pool } = require('../../db');
  * @param {string} email - The email of the newly registered user.
  * @returns {Promise<void>}
  */
-async function linkInvitedUser(userId, email) {
+async function linkInvitedUser(userId, userEmail) {
     const client = await pool.connect();
     try {
-        await client.query(
-            `UPDATE eligible_voters SET user_id = $1 WHERE email = $2 AND user_id IS NULL`,
-            [userId, email]
-        );
+      const sql = `
+        UPDATE eligible_voters
+        SET user_id = $1
+        WHERE LOWER(email) = LOWER($2)
+          AND (user_id IS NULL)
+        RETURNING id, election_id, email;
+      `;
+      const params = [userId, userEmail];
+  
+      const result = await client.query(sql, params);
+  
+      if (result.rowCount > 0) {
+        console.log(`Successfully linked user ${userId} to ${result.rowCount} invited eligible_voters rows.`);
+        result.rows.forEach(r => console.log('linked eligible_voter:', r));
+      } else {
+        console.log(`No invited eligible_voters found for email=${userEmail}`);
+      }
+  
+      return result.rows;
     } catch (error) {
-        console.error('Error linking invited user:', error);
-        // Re-throw the error to be handled by the calling controller
-        throw error;
+      console.error('Error linking invited user:', error);
+      throw error; 
     } finally {
-        client.release();
+      client.release();
     }
-}
+  }
+
 
 module.exports = {
     linkInvitedUser,

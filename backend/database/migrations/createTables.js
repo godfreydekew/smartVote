@@ -6,6 +6,8 @@ async function createTables() {
   try {
     await client.query('BEGIN');
 
+    await client.query('CREATE EXTENSION IF NOT EXISTS timescaledb;');
+
     await client.query(`
         CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
@@ -114,6 +116,27 @@ async function createTables() {
             updated_at TIMESTAMP
         );
     `);
+
+    await client.query(`
+        CREATE TABLE IF NOT EXISTS election_analytics (
+            election_id INTEGER PRIMARY KEY REFERENCES elections(id) ON DELETE CASCADE,
+            voter_turnout_percentage FLOAT DEFAULT 0,
+            average_voter_age FLOAT,
+            gender_distribution JSONB,
+            regional_distribution JSONB,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+    `);
+    
+    await client.query(`
+        CREATE TABLE IF NOT EXISTS vote_log (
+            time TIMESTAMPTZ NOT NULL,
+            election_id INTEGER REFERENCES elections(id) ON DELETE CASCADE,
+            candidate_id INTEGER REFERENCES candidates(id) ON DELETE CASCADE
+        );
+    `);
+
+    await client.query(`SELECT create_hypertable('vote_log', 'time', if_not_exists => TRUE);`);
 
     await client.query('COMMIT');
     console.log('All tables created successfully.');

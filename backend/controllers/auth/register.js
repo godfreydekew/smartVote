@@ -16,6 +16,7 @@ const createUserSchema = yup.object().shape({
 
 const postUser = async (req, res) => {
   const { email, password, full_name, age, gender, countryOfResidence } = req.body;
+  console.log(`register.js: Received registration request for email: ${email}`);
 
   try {
     await createUserSchema.validate(
@@ -23,7 +24,10 @@ const postUser = async (req, res) => {
       { abortEarly: false }
     );
 
+    console.log(`register.js: ashing password for: ${email}`);
     const hashedPassword = await bcrypt.hash(password, Number(process.env.SALT_ROUNDS));
+    
+    console.log(`register.js: Creating user in database for: ${email}`);
     const user = await createUser(
       email,
       hashedPassword,
@@ -33,14 +37,16 @@ const postUser = async (req, res) => {
       countryOfResidence
     );
 
-    // After creating the user, check if they match criteria for any upcoming elections
+    console.log(`register.js: Checking for eligible elections for new user: ${user.id}`);
     await addUserToEligibleElections(user);
 
-    // Check for pending invitations and link them to the new user account
+    console.log(`register.js: Checking for pending invitations for new user: ${user.id}`);
     await linkInvitedUser(user.id, user.email);
 
+    console.log(`register.js: User registration successful for: ${email}`);
     res.status(201).json({ message: 'User created successfully', user });
   } catch (error) {
+    console.error(`register.js: User registration failed for ${email}:`, error.message);
     if (error instanceof yup.ValidationError) {
       return res.status(400).json({ errors: error.errors });
     }

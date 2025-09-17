@@ -44,6 +44,7 @@ const Login = () => {
   const account = useActiveAccount();
   const { data: profiles, isLoading: profilesLoading } = useProfiles({ client });
   const [isInitializing, setIsInitializing] = useState(true);
+  const [isAutoFilled, setIsAutoFilled] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showEmailHelp, setShowEmailHelp] = useState(false);
   const [showPasswordHelp, setShowPasswordHelp] = useState(false);
@@ -74,7 +75,7 @@ const Login = () => {
 
   // Auto-fill email if verified through Connect component
   useEffect(() => {
-    if (account?.address && profiles?.[0]?.details?.email) {
+    if (account?.address && profiles?.[0]?.details?.email && !isAutoFilled) {
       setValue('email', profiles[0].details.email);
       // Auto-focus and highlight password field after email verification
       const passwordInput = document.getElementById('password');
@@ -82,7 +83,7 @@ const Login = () => {
         passwordInput.focus();
       }
     }
-  }, [account, profiles, setValue]);
+  }, [account, profiles, setValue, isAutoFilled]);
 
   const onSubmit = async (data: FormData) => {
     try {

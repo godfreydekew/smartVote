@@ -13,7 +13,7 @@ import CandidateDetailDialog from '@/components/election/CandidateDetailDialog';
 import VoteConfirmDialog from '@/components/election/VoteConfirmDialog';
 import VoteConfirmation from '@/components/vote/VoteConfirmation';
 import { BlockchainLogs } from '@/components/election/BlockchainLogs';
-import { ElectionStats } from '@/components/election/ElectionStats';
+import { ElectionAnalytics } from '@/components/election/ElectionAnalytics';
 
 import { electionService } from '@/api';
 import { userService } from '@/api';
@@ -317,7 +317,7 @@ const ElectionDetailsPage = () => {
 
       // If blockchain transaction successful, record in database
       if (txResult) {
-        const voteResponse = await electionService.vote(Number(id));
+        const voteResponse = await electionService.vote(Number(id), Number(candidateToVote.id));
         setVoteTx(txResult);
         if (voteResponse) {
           toast({
@@ -413,11 +413,9 @@ const ElectionDetailsPage = () => {
           />
         </div>
 
-        {/* Election Stats Section - Only visible to admin users */}
-        {election.status === 'completed' && (
-          <ElectionStats
-            address={address}
-          />
+        {/* Election Analytics Section - Only visible when election is active or completed */}
+        {(isActive || isCompleted) && (
+          <ElectionAnalytics />
         )}
 
         {/* Blockchain Logs Section - Only visible to admin users */}
