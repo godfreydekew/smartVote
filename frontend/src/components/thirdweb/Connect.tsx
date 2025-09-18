@@ -11,10 +11,10 @@ export const wallets = [
         "email",
       ],
     },
-    // smartAccount: {
-    //   chain: sepolia,
-    //   sponsorGas: false,
-    // },
+    smartAccount: {
+      chain: sepolia,
+      sponsorGas: false,
+    },
   }),
 ];
 

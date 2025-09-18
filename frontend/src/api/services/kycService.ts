@@ -4,8 +4,8 @@ import apiClient from '@/api/config';
 const kycService = {
   startVerification: async (userId: string) => {
     // Original code commented out for simulation
-    // const response = await apiClient.post('/kyc/start', { userId });
-    // return response.data;
+    const response = await apiClient.post('/kyc/start', { userId });
+    return response.data;
 
     // --- Simulation Code ---
     console.log("Simulating KYC start verification...");
@@ -13,22 +13,22 @@ const kycService = {
     const fakeVerificationUrl = `/kyc-callback?sessionId=${fakeSessionId}`;
 
     // Return a promise that resolves with the fake URL after a short delay
-    return new Promise(resolve => {
-        setTimeout(() => {
-            console.log(`Simulating start verification with URL: ${fakeVerificationUrl}`);
-            resolve({
-                sessionId: fakeSessionId,
-                verificationUrl: fakeVerificationUrl,
-            });
-        }, 1000); // 1 second delay
-    });
+    // return new Promise(resolve => {
+    //     setTimeout(() => {
+    //         console.log(`Simulating start verification with URL: ${fakeVerificationUrl}`);
+    //         resolve({
+    //             sessionId: fakeSessionId,
+    //             verificationUrl: fakeVerificationUrl,
+    //         });
+    //     }, 1000); // 1 second delay
+    // });
     // --- End Simulation Code ---
   },
 
   getVerificationResult: async (sessionId: string) => {
     // Original code commented out for simulation
-    // const response = await apiClient.get(`/kyc/result/${sessionId}`);
-    // return response.data;
+    const response = await apiClient.get(`/kyc/result/${sessionId}`);
+    return response.data;
 
     // --- Simulation Code ---
     console.log("Simulating KYC result fetch...");

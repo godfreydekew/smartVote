@@ -37,8 +37,9 @@ const KYC = () => {
 
     try {
       const data = await kycService.startVerification(user.id);
-      if (data.verificationUrl) {
-        window.location.href = data.verificationUrl;
+      
+      if (data.url) {
+        window.location.href = data.url;
       } else {
         toast({
           title: 'Error',
