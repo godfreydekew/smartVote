@@ -90,13 +90,6 @@ const Hero = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="text-lg px-8 py-6 rounded-full border-2 hover:border-vote-blue hover:bg-vote-blue/5 transition-all duration-300"
-              >
-              View Demo
-            </Button>
             </motion.div>
           </motion.div>
 

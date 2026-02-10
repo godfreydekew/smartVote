@@ -86,13 +86,6 @@ const Cta = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Button 
-                  size="lg" 
-                  className="text-lg px-8 py-6 rounded-full bg-gradient-to-r from-vote-blue to-vote-teal hover:from-vote-blue/90 hover:to-vote-teal/90 shadow-lg hover:shadow-xl hover:shadow-vote-blue/25 transition-all duration-300"
-                >
-                  <PlayCircle className="mr-2 h-5 w-5" />
-                Watch Demo
-              </Button>
               </motion.div>
 
               <motion.div
